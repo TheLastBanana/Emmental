@@ -45,10 +45,10 @@ void StrategyManager::addStrategies()
 		"0 "	// SCV
 		"4 "    // Refinery
 		"0 "	// SCV
+		"1 "	// Supply depot
 		"9 "	// Factory
 		"0 "	// SCV
 		"0 "	// SCV
-		"1 "	// Supply depot
 		"0 "	// SCV
 		"9";	// Factory
 	
@@ -663,20 +663,24 @@ const MetaPairVector StrategyManager::getProtossZealotRushBuildOrderGoal() const
 	return goal;
 }
 
+// According to documentation, this is called...
+// * If the current BuildOrderQueue is empty
+// * If a supply deadlock is detected (we have too little supply to build a unit)
+// * If a critical unit (building or worker) has died
+// * If an enemy cloaked unit is detected
 const MetaPairVector StrategyManager::getTerranBuildOrderGoal() const
 {
 	// the goal to return
 	std::vector< std::pair<MetaType, UnitCountType> > goal;
 
-	int numMarines =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Marine);
-	int numMedics =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Medic);
-	int numWraith =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Wraith);
+	//int numMarines =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Marine);
+	int numVultures =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Vulture);
 
-	int marinesWanted = numMarines + 12;
-	int medicsWanted = numMedics + 2;
-	int wraithsWanted = numWraith + 4;
+	int marinesWanted = 5;
+	int vulturesWanted = numVultures + 8;
 
 	goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Marine, marinesWanted));
+	goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Vulture, vulturesWanted));
 
 	return (const std::vector< std::pair<MetaType, UnitCountType> >)goal;
 }
