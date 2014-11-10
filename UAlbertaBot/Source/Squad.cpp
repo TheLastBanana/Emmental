@@ -161,7 +161,7 @@ bool Squad::needsToRegroup()
 	if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossDarkTemplar &&
 		(BWAPI::Broodwar->self()->deadUnitCount(BWAPI::UnitTypes::Protoss_Dark_Templar) == 0))
 	{
-		regroupStatus = std::string("\x04 DARK TEMPLAR HOOOOO!");
+		regroupStatus = std::string("\x04 BLUE CHEESE HOOOOO!");
 		return false;
 	}
 

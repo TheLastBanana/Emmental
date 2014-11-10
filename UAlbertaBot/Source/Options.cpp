@@ -136,6 +136,7 @@ namespace Options
 	{
 		bool DRAW_UALBERTABOT_DEBUG				= true;		// draws debug information for UAlbertaBot
 		bool DRAW_DEBUG_INTERFACE				= false;		// draws debug information for EnhancedUI
+		bool DRAW_UALBERTABOT_SEARCHINFO		= false;	// draws UAlbertaBot's search Info debug (which covers printf)
 
 		BWAPI::Color COLOR_LINE_TARGET			= BWAPI::Colors::White;
 		BWAPI::Color COLOR_LINE_MINERAL			= BWAPI::Colors::Cyan;

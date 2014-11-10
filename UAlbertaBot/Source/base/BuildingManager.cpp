@@ -83,7 +83,7 @@ void BuildingManager::assignWorkersToUnassignedBuildings()
 			buildingData.removeCurrentBuilding(ConstructionData::Unassigned);
 			break;
 		}
-
+		
 		// get the building location
 		BWAPI::TilePosition testLocation = getBuildingLocation(b);
 
@@ -173,7 +173,7 @@ BWAPI::TilePosition BuildingManager::getBuildingLocation(const Building & b)
 		else
 		{
 			// set the building padding specifically
-			int distance = b.type == BWAPI::UnitTypes::Protoss_Photon_Cannon ? 0 : 1;
+			int distance = b.type == BWAPI::UnitTypes::Terran_Bunker ? 0 : 1;
 
 			// whether or not we want the distance to be horizontal only
             bool horizontalOnly = b.type == BWAPI::UnitTypes::Protoss_Citadel_of_Adun ? true : false;
@@ -184,8 +184,20 @@ BWAPI::TilePosition BuildingManager::getBuildingLocation(const Building & b)
 			// get a region anywhere
 			BWAPI::TilePosition posNotInRegion = BuildingPlacer::Instance().getBuildLocationNear(b, distance, false, horizontalOnly);
 
-			// set the location with priority on positions in our own region
-			testLocation = (posInRegion != BWAPI::TilePositions::None) ? posInRegion : posNotInRegion;
+			// set the location with priority on positions in our own region, unless bunker.
+			if (b.type.getID() == BWAPI::UnitTypes::Terran_Bunker)
+			{
+				// Specific x & y provided later provided by a yet non-existing choke point finder.
+				// If providing pixel coordinates, need to divide by 32, as this map usees Build Tiles which are 32*32px each.
+				int x = 2500 / 32;
+				int y = 2100 / 32;
+				BWAPI::TilePosition bunkerLocation = BuildingPlacer::Instance().getBuildLocationNear(b, distance, false, false, x, y);
+				testLocation = bunkerLocation;
+			}
+			else
+			{
+				testLocation = (posInRegion != BWAPI::TilePositions::None) ? posInRegion : posNotInRegion;
+			}
 		}
 	}
 
@@ -327,6 +339,9 @@ void BuildingManager::checkForCompletedBuildings() {
 			if (BWAPI::Broodwar->self()->getRace() == BWAPI::Races::Terran)
 			{
 				WorkerManager::Instance().finishedWithWorker(b.builderUnit);
+				// if bunker was created, announce the associated pun.
+				if (b.type.getID() == BWAPI::UnitTypes::Terran_Bunker)
+					BWAPI::Broodwar->printf("Bunker Hill Cheese company chain established!");
 			}
 
 			// remove this unit from the under construction vector

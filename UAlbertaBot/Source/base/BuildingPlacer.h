@@ -33,7 +33,7 @@ class BuildingPlacer
 	bool					canBuildHereWithSpace(BWAPI::TilePosition position, const Building & b, int buildDist, bool horizontalOnly = false) const;
 
 	// returns a build location near a building's desired location
-	BWAPI::TilePosition		getBuildLocationNear(const Building & b, int buildDist, bool inRegion = false, bool horizontalOnly = false) const;
+	BWAPI::TilePosition		getBuildLocationNear(const Building & b, int buildDist, bool inRegion = false, bool horizontalOnly = false, int xLoc = -1, int yLoc = -1) const;
 	
 	void					reserveTiles(BWAPI::TilePosition position, int width, int height);
 	void					freeTiles(BWAPI::TilePosition position, int width, int height);

@@ -53,6 +53,7 @@ namespace Options
 	{
 		extern bool DRAW_UALBERTABOT_DEBUG;				// draws debug information for UAlbertaBot
 		extern bool DRAW_DEBUG_INTERFACE;				// draws debug information for EnhancedUI
+		extern bool DRAW_UALBERTABOT_SEARCHINFO;		//draws UAlbertaBot's search Info debug (which covers printf)
 
 		extern BWAPI::Color COLOR_LINE_TARGET;
 		extern BWAPI::Color COLOR_LINE_MINERAL;

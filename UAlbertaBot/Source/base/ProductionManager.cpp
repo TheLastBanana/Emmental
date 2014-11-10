@@ -64,6 +64,11 @@ void ProductionManager::performBuildOrderSearch(const std::vector< std::pair<Met
 			buildOrder.push_back(MetaType(BWAPI::UnitTypes::Terran_Factory));
 		}
 
+		// Testing Bunkers
+		if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Bunker) < 1) {
+			buildOrder.push_back(MetaType(BWAPI::UnitTypes::Terran_Bunker));
+		}
+
 	// Run build order search
 	} else {
 		buildOrder = StarcraftBuildOrderSearchManager::Instance().findBuildOrder(goal);
