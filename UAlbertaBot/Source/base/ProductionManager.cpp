@@ -65,9 +65,10 @@ void ProductionManager::performBuildOrderSearch(const std::vector< std::pair<Met
 		}
 
 		// Testing Bunkers
-		if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Bunker) < 1) {
+		/*if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Bunker) < 1) {
 			buildOrder.push_back(MetaType(BWAPI::UnitTypes::Terran_Bunker));
 		}
+		*/
 
 	// Run build order search
 	} else {
