@@ -58,15 +58,16 @@ void RangedManager::executeMicro(const UnitVector & targets)
 
 void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, BWAPI::Unit * target)
 {
-	
 	double range(rangedUnit->getType().groundWeapon().maxRange());
 	if (rangedUnit->getType() == BWAPI::UnitTypes::Protoss_Dragoon && BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Singularity_Charge))
 	{
 		range = 6*32;
 	}
 
+	double tRange = target->getType().groundWeapon().maxRange();
+
 	// determine whether the target can be kited
-	if (range <= target->getType().groundWeapon().maxRange())
+	if (range <= tRange)
 	{
 		// if we can't kite it, there's no point
 		smartAttackUnit(rangedUnit, target);
@@ -95,17 +96,66 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, BWAPI::Unit * target)
 			(int)range, BWAPI::Colors::Cyan);
 	}
 
+	// check if already fleeing
+	BWAPI::UnitCommand currentCommand(rangedUnit->getLastCommand());
+
 	// if we can't shoot, run away
 	if (kite)
 	{
-		BWAPI::Position fleePosition(rangedUnit->getPosition() - target->getPosition() + rangedUnit->getPosition());
+		// direction from target to current unit (so we move away from the target)
+		double2 direction(rangedUnit->getPosition() - target->getPosition());
+		direction.normalise();
 
-		BWAPI::Broodwar->drawLineMap(rangedUnit->getPosition().x(), rangedUnit->getPosition().y(), 
+		BWAPI::Position fleePosition;
+		bool found = false;
+
+		// check in expanding circles for a valid flee position
+		for (double moveDist = dist; moveDist < 300.0; moveDist += 10.0) {
+
+			// check every 45 degrees, mirroring along the way.
+			// direction is calculated based on the relative positions of the unit and its target,
+			// so we start by checking if backpedaling slightly is possible, then consider other angles.
+			// this goes up to 180, so it's possible to end up running past the target if it's the only option.
+			for (double angle = 0; angle < 180.0; angle += 45.0) {
+				// get rotated offset
+				double2 offset = direction * moveDist;
+				offset.rotate(angle);
+
+				// add offset to get flee position and check if it's a good place to run
+				fleePosition = rangedUnit->getPosition() + offset;
+				if (checkPositionWalkable(fleePosition) && target->getDistance(fleePosition) > tRange) {
+					found = true;
+					break;
+				}
+
+				// rotate the other way
+				offset = direction * moveDist;
+				offset.rotate(-angle);
+
+				// add offset to get flee position and check if it's a good place to run
+				fleePosition = rangedUnit->getPosition() + offset;
+				if (checkPositionWalkable(fleePosition) && target->getDistance(fleePosition) > tRange) {
+					found = true;
+					break;
+				}
+			}
+		}
+
+		BWAPI::Broodwar->drawLineMap(rangedUnit->getPosition().x(), rangedUnit->getPosition().y(),
 			fleePosition.x(), fleePosition.y(), BWAPI::Colors::Cyan);
 
-		smartMove(rangedUnit, fleePosition);
+		// no flee position found; just attack
+		if (!found) {
+			if (rangedUnit->isSelected()) BWAPI::Broodwar->printf("No escape!");
+
+			smartAttackUnit(rangedUnit, target);
+			return;
+		}
+
+		// force movement, even if we're mid-attack
+		smartMove(rangedUnit, fleePosition, true);
 	}
-	// otherwise shoot
+	// otherwise shoot if not already fleeing
 	else
 	{
 		smartAttackUnit(rangedUnit, target);
