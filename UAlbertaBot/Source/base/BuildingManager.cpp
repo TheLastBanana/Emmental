@@ -173,29 +173,30 @@ BWAPI::TilePosition BuildingManager::getBuildingLocation(const Building & b)
 		else
 		{
 			// set the building padding specifically
-			int distance = b.type == BWAPI::UnitTypes::Terran_Bunker ? 0 : 1;
+			int distance = 1;
+			if (b.type == BWAPI::UnitTypes::Terran_Missile_Turret || b.type == BWAPI::UnitTypes::Terran_Bunker)
+				distance = 0;
 
 			// whether or not we want the distance to be horizontal only
             bool horizontalOnly = b.type == BWAPI::UnitTypes::Protoss_Citadel_of_Adun ? true : false;
 
-			// get a position within our region
-			BWAPI::TilePosition posInRegion =    BuildingPlacer::Instance().getBuildLocationNear(b, distance, true,  horizontalOnly);
-
-			// get a region anywhere
-			BWAPI::TilePosition posNotInRegion = BuildingPlacer::Instance().getBuildLocationNear(b, distance, false, horizontalOnly);
-
 			// set the location with priority on positions in our own region, unless bunker.
 			if (b.type.getID() == BWAPI::UnitTypes::Terran_Bunker)
 			{
-				// Specific x & y provided later provided by a yet non-existing choke point finder.
-				// If providing pixel coordinates, need to divide by 32, as this map usees Build Tiles which are 32*32px each.
-				int x = 2500 / 32;
-				int y = 2100 / 32;
-				BWAPI::TilePosition bunkerLocation = BuildingPlacer::Instance().getBuildLocationNear(b, distance, false, false, x, y);
+				// finding nearest chokepoint to base
+				BWAPI::TilePosition position = MapTools::Instance().getClosestChokepoint(BWAPI::Broodwar->self()->getStartLocation());
+
+				BWAPI::TilePosition bunkerLocation = BuildingPlacer::Instance().getBuildLocationNear(b, distance, false, false, position);
 				testLocation = bunkerLocation;
 			}
 			else
 			{
+				// get a position within our region
+				BWAPI::TilePosition posInRegion = BuildingPlacer::Instance().getBuildLocationNear(b, distance, true, horizontalOnly);
+
+				// get a region anywhere
+				BWAPI::TilePosition posNotInRegion = BuildingPlacer::Instance().getBuildLocationNear(b, distance, false, horizontalOnly);
+				
 				testLocation = (posInRegion != BWAPI::TilePositions::None) ? posInRegion : posNotInRegion;
 			}
 		}
@@ -339,7 +340,7 @@ void BuildingManager::checkForCompletedBuildings() {
 			if (BWAPI::Broodwar->self()->getRace() == BWAPI::Races::Terran)
 			{
 				WorkerManager::Instance().finishedWithWorker(b.builderUnit);
-				// if bunker was created, announce the associated pun.
+				// if bunker was created, announce the associated pun. Printing locally, as announcing to enemy is bad idea...
 				if (b.type.getID() == BWAPI::UnitTypes::Terran_Bunker)
 					BWAPI::Broodwar->printf("Bunker Hill Cheese company chain established!");
 			}

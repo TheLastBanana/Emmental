@@ -113,7 +113,7 @@ void MapTools::update()
 			//if (Options::Debug::DRAW_UALBERTABOT_DEBUG) BWAPI::Broodwar->drawTextMap(unit->getPosition().x(), unit->getPosition().y(), "%s", unit->getType().getName().c_str());
 		}
 	}
-
+	drawChokepoints();
 	//drawMyRegion();
 }
 
@@ -359,6 +359,32 @@ BWAPI::TilePosition MapTools::getNextExpansion()
 	}
 }
 
+BWAPI::TilePosition MapTools::getClosestChokepoint(BWAPI::TilePosition tilePos) const
+{
+	// converting TilePosition to Position
+	BWAPI::Position position(tilePos);
+
+	BWTA::Chokepoint * choke = BWTA::getNearestChokepoint(position);
+	BWAPI::TilePosition chokeTile(choke->getCenter());
+
+	return chokeTile;
+}
+
+void MapTools::drawChokepoints() const
+{
+	BOOST_FOREACH(BWTA::Chokepoint * choke, BWTA::getChokepoints())
+	{
+		BWAPI::Color yellow(255, 255, 0);
+		BWAPI::Position left = choke->getSides().first;
+		BWAPI::Position right = choke->getSides().second;
+		BWAPI::Position centr = choke->getCenter();
+		//BWAPI::Broodwar->printf("Choke area left %d %d right %d %d", left.x(), left.y(), right.x(), right.y());
+		BWAPI::Broodwar->drawLineMap(left.x(), left.y(), right.x(), right.y(), yellow);
+
+		//BWAPI::Broodwar->printf("CenterChoke %d %d", choke->getCenter().x(), choke->getCenter().y());
+		BWAPI::Broodwar->drawCircleMap(centr.x(), centr.y(), 10, yellow, false);
+	}	
+}
 
 void MapTools::parseMap()
 {

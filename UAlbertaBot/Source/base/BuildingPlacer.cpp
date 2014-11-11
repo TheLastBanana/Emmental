@@ -178,19 +178,18 @@ bool BuildingPlacer::canBuildHereWithSpace(BWAPI::TilePosition position, const B
 	return true;
 }
 
-BWAPI::TilePosition BuildingPlacer::getBuildLocationNear(const Building & b, int buildDist, bool inRegionPriority, 
-														 bool horizontalOnly, int xLoc, int yLoc) const
+BWAPI::TilePosition BuildingPlacer::getBuildLocationNear(const Building & b, int buildDist, bool inRegionPriority, bool horizontalOnly, BWAPI::TilePosition pos) const
 {
 	//returns a valid build location near the specified tile position.
 	//searches outward in a spiral.
 	int x = 0;
 	int y = 0;
 
-	// Set a specific location given by xLoc and yLoc (xLocation & yLocation) or else just the building's original desired position.
-	if ((xLoc != -1) && (yLoc != -1))
+	// Set a specific location given by the position pos or else just use the building's original desired position.
+	if ((pos.x() != -1) && (pos.y() != -1))
 	{
-		x = xLoc;
-		y = yLoc;
+		x = pos.x();
+		y = pos.y();
 	}
 	else
 	{
