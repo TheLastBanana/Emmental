@@ -109,7 +109,7 @@
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(ProjectDir)\Release\UAlbertaBot.dll" "C:\Program Files (x86)\StarCraft\bwapi-data\AI\UAlbertaBot.dll"</Command>
+      <Command>copy /Y "$(ProjectDir)\Release\UAlbertaBot.dll" "C:\Program Files (x86)\StarCraft\bwapi-data\AI\Emmental.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
