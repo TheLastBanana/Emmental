@@ -157,8 +157,17 @@ bool Squad::needsToRegroup()
 		return false;
 	}
 
+	// for the Vulture rush strategy, we only care about whether we have enough vultures
+	if (BWAPI::Broodwar->self()->getRace() == BWAPI::Races::Terran &&
+		StrategyManager::Instance().getCurrentStrategy() == StrategyManager::TerranVultureRush)
+	{
+		// start attacking when we have 5 vultures
+		return BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Vulture) < 5;
+	}
+
 	// if we are DT rushing and we haven't lost a DT yet, no retreat!
-	if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossDarkTemplar &&
+	if (BWAPI::Broodwar->self()->getRace() == BWAPI::Races::Protoss &&
+		StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossDarkTemplar &&
 		(BWAPI::Broodwar->self()->deadUnitCount(BWAPI::UnitTypes::Protoss_Dark_Templar) == 0))
 	{
 		regroupStatus = std::string("\x04 BLUE CHEESE HOOOOO!");
