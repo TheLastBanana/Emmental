@@ -180,12 +180,12 @@ void MicroManager::smartAttackUnit(BWAPI::Unit * attacker, BWAPI::Unit * target)
 
 }
 
-void MicroManager::smartAttackMove(BWAPI::Unit * attacker, BWAPI::Position targetPosition) const
+void MicroManager::smartAttackMove(BWAPI::Unit * attacker, BWAPI::Position targetPosition, bool force) const
 {
 	assert(attacker);
 
 	// if we have issued a command to this unit already this frame, ignore this one
-	if (attacker->getLastCommandFrame() >= BWAPI::Broodwar->getFrameCount() || attacker->isAttackFrame())
+	if ((attacker->getLastCommandFrame() >= BWAPI::Broodwar->getFrameCount() || attacker->isAttackFrame()) && !force)
 	{
 		return;
 	}
@@ -207,12 +207,12 @@ void MicroManager::smartAttackMove(BWAPI::Unit * attacker, BWAPI::Position targe
 									BWAPI::Colors::Orange );
 }
 
-void MicroManager::smartMove(BWAPI::Unit * attacker, BWAPI::Position targetPosition) const
+void MicroManager::smartMove(BWAPI::Unit * attacker, BWAPI::Position targetPosition, bool force) const
 {
 	assert(attacker);
 
 	// if we have issued a command to this unit already this frame, ignore this one
-	if (attacker->getLastCommandFrame() >= BWAPI::Broodwar->getFrameCount() || attacker->isAttackFrame())
+	if ((attacker->getLastCommandFrame() >= BWAPI::Broodwar->getFrameCount() || attacker->isAttackFrame()) && !force)
 	{
 		if (attacker->isSelected())
 		{

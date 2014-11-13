@@ -80,5 +80,11 @@ public:
 	int	getMyBaseDistance(BWAPI::Position p);
 	BWAPI::Position getEnemyBaseMoveTo(BWAPI::Position p);
 	
+	// get closest choke point to the position given.
+	BWAPI::TilePosition MapTools::getClosestChokepoint(BWAPI::TilePosition tilePos) const;
+
+	// drawing all choke points on the map... even if not discovered yet... Is this cheating? Work only with explored area?
+	void drawChokepoints() const;
+
 	void parseMap();
 };
