@@ -64,7 +64,7 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, BWAPI::Unit * target)
 		range = 6*32;
 	}
 
-	double tRange = target->getType().groundWeapon().maxRange();
+	double tRange(target->getType().groundWeapon().maxRange() + target->getType().topSpeed() * 1.5);
 
 	// determine whether the target can be kited
 	if (range <= tRange)
@@ -79,12 +79,19 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, BWAPI::Unit * target)
 	double		dist(rangedUnit->getDistance(target));
 	double		speed(rangedUnit->getType().topSpeed());
 
+	// don't kite damageless enemies
+	if (target->getType().groundWeapon() == BWAPI::WeaponTypes::None) {
+		kite = false;
+	}
+
+	// stay still if it'll take us longer to get back in range than to cooldown the weapon
 	double	timeToEnter = std::max(0.0,(dist - range) / speed);
 	if ((timeToEnter >= rangedUnit->getGroundWeaponCooldown()) && (dist >= minDist))
 	{
 		kite = false;
 	}
 
+	// don't kite buildings
 	if (target->getType().isBuilding() && target->getType() != BWAPI::UnitTypes::Terran_Bunker)
 	{
 		kite = false;
@@ -95,9 +102,6 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, BWAPI::Unit * target)
 		BWAPI::Broodwar->drawCircleMap(rangedUnit->getPosition().x(), rangedUnit->getPosition().y(), 
 			(int)range, BWAPI::Colors::Cyan);
 	}
-
-	// check if already fleeing
-	BWAPI::UnitCommand currentCommand(rangedUnit->getLastCommand());
 
 	// if we can't shoot, run away
 	if (kite)

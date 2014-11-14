@@ -162,7 +162,7 @@ bool Squad::needsToRegroup()
 		StrategyManager::Instance().getCurrentStrategy() == StrategyManager::TerranVultureRush)
 	{
 		// start attacking when we have 5 vultures
-		return BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Vulture) < 5;
+		return units.size() < 5;
 	}
 
 	// if we are DT rushing and we haven't lost a DT yet, no retreat!
