@@ -78,7 +78,6 @@ void ProductionManager::update()
 	{
 		BWAPI::Broodwar->drawTextScreen(150, 10, "Nothing left to build, new search!");
 		const std::vector< std::pair<MetaType, UnitCountType> > newGoal = StrategyManager::Instance().getBuildOrderGoal();
-		BWAPI::Broodwar->printf("%s", newGoal[0].first.unitType.getName());
 		performBuildOrderSearch(newGoal);
 	}
 
