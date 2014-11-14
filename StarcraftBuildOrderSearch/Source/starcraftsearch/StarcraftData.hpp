@@ -95,8 +95,9 @@ class StarcraftData {
 			actions.push_back(StarcraftAction(BWAPI::TechTypes::Stim_Packs, actions.size()));				// 7
 			actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Medic, actions.size()));				// 8
 			actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Factory, actions.size()));			// 9
-			actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Starport, actions.size()));			// 10
-			actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Wraith, actions.size()));			// 11
+			actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Vulture, actions.size()));			// 10
+			actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Starport, actions.size()));			// 11
+			actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Wraith, actions.size()));			// 12
 		}
 		else if (r == BWAPI::Races::Zerg)
 		{

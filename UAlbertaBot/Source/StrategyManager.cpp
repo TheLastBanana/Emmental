@@ -677,10 +677,15 @@ const MetaPairVector StrategyManager::getTerranBuildOrderGoal() const
 	int numVultures =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Vulture);
 
 	int marinesWanted = 5;
-	int vulturesWanted = numVultures + 8;
+	int factoriesWanted = 4;
+	int vulturesWanted = numVultures + 5;
 
 	goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Marine, marinesWanted));
-	goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Vulture, vulturesWanted));
+
+	goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Factory, factoriesWanted));
+	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 0) {
+		goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Vulture, vulturesWanted));
+	}
 
 	return (const std::vector< std::pair<MetaType, UnitCountType> >)goal;
 }

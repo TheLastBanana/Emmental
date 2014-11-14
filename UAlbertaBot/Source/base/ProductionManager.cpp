@@ -42,38 +42,7 @@ void ProductionManager::setBuildOrder(const std::vector<MetaType> & buildOrder)
 void ProductionManager::performBuildOrderSearch(const std::vector< std::pair<MetaType, UnitCountType> > & goal)
 {
 	std::vector<MetaType> buildOrder;
-
-	// Override the build order search manager for our strategy
-	if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::TerranVultureRush) {
-		// We always need 5 marines
-		int marinesWanted = 5;
-		int numMarines = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Marine);
-
-		for (; numMarines < marinesWanted; ++numMarines) {
-			buildOrder.push_back(MetaType(BWAPI::UnitTypes::Terran_Marine));
-		}
-
-		// Build some more vultures
-		int vulturesWanted = 6;
-		for (int i = 0; i < vulturesWanted; ++i) {
-			buildOrder.push_back(MetaType(BWAPI::UnitTypes::Terran_Vulture));
-		}
-
-		// Build a factory
-		if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Factory) < 4) {
-			buildOrder.push_back(MetaType(BWAPI::UnitTypes::Terran_Factory));
-		}
-
-		// Testing Bunkers
-		/*if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Bunker) < 1) {
-			buildOrder.push_back(MetaType(BWAPI::UnitTypes::Terran_Bunker));
-		}
-		*/
-
-	// Run build order search
-	} else {
-		buildOrder = StarcraftBuildOrderSearchManager::Instance().findBuildOrder(goal);
-	}
+	buildOrder = StarcraftBuildOrderSearchManager::Instance().findBuildOrder(goal);
 
 	// set the build order
 	setBuildOrder(buildOrder);
@@ -109,6 +78,7 @@ void ProductionManager::update()
 	{
 		BWAPI::Broodwar->drawTextScreen(150, 10, "Nothing left to build, new search!");
 		const std::vector< std::pair<MetaType, UnitCountType> > newGoal = StrategyManager::Instance().getBuildOrderGoal();
+		BWAPI::Broodwar->printf("%s", newGoal[0].first.unitType.getName());
 		performBuildOrderSearch(newGoal);
 	}
 
