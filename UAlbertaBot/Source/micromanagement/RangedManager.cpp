@@ -1,7 +1,76 @@
 #include "Common.h"
 #include "RangedManager.h"
 
+// Get effective range of unit, taking into account the fact that it can move
+double getEffectiveRange(BWAPI::Unit * unit)
+{
+	double speedWeight = 1.5;
+	return unit->getType().groundWeapon().maxRange() + unit->getType().topSpeed() * speedWeight;
+}
+
 RangedManager::RangedManager() { }
+
+// Check that the given position is a good place to flee given enemy positions
+bool RangedManager::checkFleePosition(const BWAPI::Unit * rangedUnit, const UnitVector & targets, const BWAPI::Position & fleePosition)
+{
+	// Check that the position is free
+	if (!checkPositionWalkable(fleePosition))
+	{
+		return false;
+	}
+
+	// Check that no enemies in view can target this position
+	BOOST_FOREACH(BWAPI::Unit * enemy, targets)
+	{
+		if (enemy->getDistance(fleePosition) < getEffectiveRange(enemy))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+// Try fleeing toward a position in a micromanaged way which allows squadmate avoidance
+// Currently not used because it actually decreases effectiveness.
+void RangedManager::flee(BWAPI::Unit * rangedUnit, const BWAPI::Position & fleePosition)
+{
+	// Plan only as far as we can make it in the next 10 frames
+	double2 offset(fleePosition - rangedUnit->getPosition());
+	offset.normalise();
+	double fleeDist = std::min(rangedUnit->getType().topSpeed() * 10, rangedUnit->getPosition().getDistance(fleePosition));
+	BWAPI::Position tempPosition(rangedUnit->getPosition() + offset * fleeDist);
+	BWAPI::Position test(tempPosition);
+
+	// Try to avoid running into squadmates
+	double maxPush(20.0);	// How far we'll try to move if the unit is at minimum distance
+	double dropOff(0.0001);	// How quickly push drops off given distance
+
+	const UnitVector & rangedUnits = getUnits();
+	BOOST_FOREACH(BWAPI::Unit * squadmate, rangedUnits)
+	{
+		if (squadmate == rangedUnit) break;
+
+		double2 offset(rangedUnit->getPosition() - squadmate->getPosition());
+		double dist = std::max(1.0, offset.lenSq());
+		double push = std::min(maxPush, maxPush / (dist * dropOff));
+		offset.normalise();
+		offset = offset * push;
+
+		tempPosition += offset;
+
+		BWAPI::Broodwar->drawLineMap(test.x(), test.y(), test.x() + offset.x, test.y() + offset.y, BWAPI::Colors::Cyan);
+	}
+
+	// If the new position isn't free, just use let pathfinding do the work
+	if (!checkPositionWalkable(tempPosition))
+	{
+		tempPosition = fleePosition;
+	}
+
+	// Force movement, even if we're mid-attack
+	smartMove(rangedUnit, tempPosition, true);
+}
 
 void RangedManager::executeMicro(const UnitVector & targets) 
 {
@@ -34,7 +103,7 @@ void RangedManager::executeMicro(const UnitVector & targets)
 				BWAPI::Unit * target = getTarget(rangedUnit, rangedUnitTargets);
 
 				// attack it
-				kiteTarget(rangedUnit, target);
+				kiteTarget(rangedUnit, rangedUnitTargets, target);
 			}
 			// if there are no targets
 			else
@@ -56,7 +125,7 @@ void RangedManager::executeMicro(const UnitVector & targets)
 	}
 }
 
-void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, BWAPI::Unit * target)
+void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targets, BWAPI::Unit * target)
 {
 	double range(rangedUnit->getType().groundWeapon().maxRange());
 	if (rangedUnit->getType() == BWAPI::UnitTypes::Protoss_Dragoon && BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Singularity_Charge))
@@ -64,10 +133,8 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, BWAPI::Unit * target)
 		range = 6*32;
 	}
 
-	double tRange(target->getType().groundWeapon().maxRange() + target->getType().topSpeed() * 1.5);
-
 	// determine whether the target can be kited
-	if (range <= tRange)
+	if (range <= getEffectiveRange(target))
 	{
 		// if we can't kite it, there's no point
 		smartAttackUnit(rangedUnit, target);
@@ -114,20 +181,24 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, BWAPI::Unit * target)
 		bool found = false;
 
 		// check in expanding circles for a valid flee position
-		for (double moveDist = dist; moveDist < 300.0; moveDist += 10.0) {
-
+		for (double moveDist = dist; moveDist < 300.0; moveDist += 10.0)
+		{
 			// check every 45 degrees, mirroring along the way.
 			// direction is calculated based on the relative positions of the unit and its target,
 			// so we start by checking if backpedaling slightly is possible, then consider other angles.
 			// this goes up to 180, so it's possible to end up running past the target if it's the only option.
-			for (double angle = 0; angle < 180.0; angle += 45.0) {
+			for (double angle = 0; angle < 180.0; angle += 45.0)
+			{
+				// try both angles (clockwise and counter-clockwise)
+
 				// get rotated offset
 				double2 offset = direction * moveDist;
 				offset.rotate(angle);
 
 				// add offset to get flee position and check if it's a good place to run
 				fleePosition = rangedUnit->getPosition() + offset;
-				if (checkPositionWalkable(fleePosition) && target->getDistance(fleePosition) > tRange) {
+				if (checkFleePosition(rangedUnit, targets, fleePosition))
+				{
 					found = true;
 					break;
 				}
@@ -138,7 +209,8 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, BWAPI::Unit * target)
 
 				// add offset to get flee position and check if it's a good place to run
 				fleePosition = rangedUnit->getPosition() + offset;
-				if (checkPositionWalkable(fleePosition) && target->getDistance(fleePosition) > tRange) {
+				if (checkFleePosition(rangedUnit, targets, fleePosition))
+				{
 					found = true;
 					break;
 				}
@@ -148,15 +220,21 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, BWAPI::Unit * target)
 		BWAPI::Broodwar->drawLineMap(rangedUnit->getPosition().x(), rangedUnit->getPosition().y(),
 			fleePosition.x(), fleePosition.y(), BWAPI::Colors::Cyan);
 
+		if (rangedUnit->isStuck())
+		{
+			BWAPI::Broodwar->printf("Stuck!");
+		}
+
 		// no flee position found; just attack
-		if (!found) {
+		if (!found)
+		{
 			if (rangedUnit->isSelected()) BWAPI::Broodwar->printf("No escape!");
 
 			smartAttackUnit(rangedUnit, target);
 			return;
 		}
 
-		// force movement, even if we're mid-attack
+		// Force movement, even if we're mid-attack
 		smartMove(rangedUnit, fleePosition, true);
 	}
 	// otherwise shoot if not already fleeing

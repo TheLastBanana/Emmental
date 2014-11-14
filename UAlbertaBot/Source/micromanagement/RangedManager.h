@@ -16,8 +16,10 @@ public:
 	BWAPI::Unit * chooseTarget(BWAPI::Unit * rangedUnit, const UnitVector & targets, std::map<BWAPI::Unit *, int> & numTargeting);
 	BWAPI::Unit * closestrangedUnit(BWAPI::Unit * target, std::set<BWAPI::Unit *> & rangedUnitsToAssign);
 
+	bool RangedManager::checkFleePosition(const BWAPI::Unit * rangedUnit, const UnitVector & targets, const BWAPI::Position & fleePosition);
+	void RangedManager::flee(BWAPI::Unit * rangedUnit, const BWAPI::Position & fleePosition);
 	int getAttackPriority(BWAPI::Unit * rangedUnit, BWAPI::Unit * target);
 	BWAPI::Unit * getTarget(BWAPI::Unit * rangedUnit, UnitVector & targets);
 
-	void kiteTarget(BWAPI::Unit * rangedUnit, BWAPI::Unit * target);
+	void kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targets, BWAPI::Unit * target);
 };
