@@ -13,15 +13,18 @@ RangedManager::RangedManager() { }
 // Check that the given position is a good place to flee given enemy positions
 bool RangedManager::checkFleePosition(const BWAPI::Unit * rangedUnit, const UnitVector & targets, const BWAPI::Position & fleePosition)
 {
-	// Check that the position is free
+	// check that the position is free
 	if (!checkPositionWalkable(fleePosition))
 	{
 		return false;
 	}
 
 	// Check that no enemies in view can target this position
-	BOOST_FOREACH(BWAPI::Unit * enemy, targets)
+	BOOST_FOREACH(BWAPI::Unit * enemy, BWAPI::Broodwar->enemy()->getUnits())
 	{
+		// ignore the enemy if it's not going to damage us
+		if (enemy->getType().groundWeapon().damageAmount() == 0 || enemy->getType().isWorker()) continue;
+
 		if (enemy->getDistance(fleePosition) < getEffectiveRange(enemy))
 		{
 			return false;
@@ -80,6 +83,11 @@ void RangedManager::executeMicro(const UnitVector & targets)
 	UnitVector rangedUnitTargets;
 	for (size_t i(0); i<targets.size(); i++) 
 	{
+		if (order.type == order.Harass && !targets[i]->getType().isWorker())
+		{
+			continue;
+		}
+
 		// conditions for targeting
 		if (targets[i]->isVisible()) 
 		{
@@ -94,7 +102,7 @@ void RangedManager::executeMicro(const UnitVector & targets)
 		//trainSubUnits(rangedUnit);
 
 		// if the order is to attack or defend
-		if (order.type == order.Attack || order.type == order.Defend) {
+		if (order.type == order.Attack || order.type == order.Defend || order.type == order.Harass) {
 
 			// if there are targets
 			if (!rangedUnitTargets.empty())
@@ -112,7 +120,13 @@ void RangedManager::executeMicro(const UnitVector & targets)
 				if (rangedUnit->getDistance(order.position) > 100)
 				{
 					// move to it
-					smartAttackMove(rangedUnit, order.position);
+					if (order.type == order.Harass)
+					{
+						smartMove(rangedUnit, order.position);
+					}
+					else {
+						smartAttackMove(rangedUnit, order.position);
+					}
 				}
 			}
 		}
@@ -152,7 +166,7 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 	}
 
 	// stay still if it'll take us longer to get back in range than to cooldown the weapon
-	double	timeToEnter = std::max(0.0,(dist - range) / speed);
+	double	timeToEnter = std::max(0.0, (dist - range) / speed + rangedUnit->getType().acceleration() / 256.0);
 	if ((timeToEnter >= rangedUnit->getGroundWeaponCooldown()) && (dist >= minDist))
 	{
 		kite = false;
@@ -298,7 +312,11 @@ int RangedManager::getAttackPriority(BWAPI::Unit * rangedUnit, BWAPI::Unit * tar
 
 	bool canAttackUs = rangedUnitType.isFlyer() ? targetType.airWeapon() != BWAPI::WeaponTypes::None : targetType.groundWeapon() != BWAPI::WeaponTypes::None;
 
-	
+	// harass prioritizes workers
+	if (order.type == order.Harass && targetType.isWorker())
+	{
+		return 4;
+	}
 
 	// highest priority is something that can attack us or aid in combat
 	if (targetType == BWAPI::UnitTypes::Terran_Medic || canAttackUs ||

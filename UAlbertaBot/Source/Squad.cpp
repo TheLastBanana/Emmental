@@ -151,7 +151,7 @@ void Squad::setManagerUnits()
 bool Squad::needsToRegroup()
 {
 	// if we are not attacking, never regroup
-	if (units.empty() || (order.type != SquadOrder::Attack))
+	if (units.empty() || !(order.type == SquadOrder::Attack || order.type == SquadOrder::Harass))
 	{
 		regroupStatus = std::string("\x04 No combat units available");
 		return false;
@@ -162,7 +162,7 @@ bool Squad::needsToRegroup()
 		StrategyManager::Instance().getCurrentStrategy() == StrategyManager::TerranVultureRush)
 	{
 		// start attacking when we have 5 vultures
-		return units.size() < 5;
+		return BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Vulture) < 5;
 	}
 
 	// if we are DT rushing and we haven't lost a DT yet, no retreat!

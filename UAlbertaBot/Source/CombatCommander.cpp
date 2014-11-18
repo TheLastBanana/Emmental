@@ -9,6 +9,11 @@ CombatCommander::CombatCommander()
 	
 }
 
+bool lowerID(BWAPI::Unit *a, BWAPI::Unit *b)
+{
+	return a->getID() < b->getID();
+}
+
 bool CombatCommander::squadUpdateFrame()
 {
 	return BWAPI::Broodwar->getFrameCount() % 24 == 0;
@@ -63,6 +68,7 @@ void CombatCommander::assignAttackSquads(std::set<BWAPI::Unit *> & unitsToAssign
 	// if we are attacking, what area are we attacking?
 	if (attackEnemy) 
 	{	
+		//assignHarass(unitsToAssign);
 		assignAttackRegion(unitsToAssign);				// attack occupied enemy region
 		assignAttackKnownBuildings(unitsToAssign);		// attack known enemy buildings
 		assignAttackVisibleUnits(unitsToAssign);			// attack visible enemy units
@@ -222,6 +228,41 @@ void CombatCommander::assignDefenseSquads(std::set<BWAPI::Unit *> & unitsToAssig
 				return;
 			}
 		}
+	}
+}
+
+void CombatCommander::assignHarass(std::set<BWAPI::Unit *> & unitsToAssign)
+{
+	if (unitsToAssign.empty()) { return; }
+
+	// grab some Vultures and set them to harass
+	if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Vulture) > 2)
+	{
+
+		// find all Vultures in assignable units
+		std::vector<BWAPI::Unit *> vultures;
+		BOOST_FOREACH(BWAPI::Unit * unit, unitsToAssign)
+		{
+			if (unit->getType() == BWAPI::UnitTypes::Terran_Vulture)
+			{
+				vultures.push_back(unit);
+			}
+		}
+
+		// sort by ID, so we always pick the oldest vultures
+		std::sort(vultures.begin(), vultures.end(), lowerID);
+
+		// remove them from the assignable units and stoee them as harassers
+		UnitVector harassers;
+		for (size_t i = 0; i < std::min((size_t) 2, vultures.size()); ++i)
+		{
+			BWAPI::Unit *unit = vultures[i];
+			unitsToAssign.erase(unit);
+			harassers.push_back(unit);
+		}
+
+		BWTA::Region * enemyRegion = getClosestEnemyRegion();
+		squadData.addSquad(Squad(harassers, SquadOrder(SquadOrder::Harass, enemyRegion->getCenter(), 1000, "Harass Workers")));
 	}
 }
 
