@@ -677,19 +677,42 @@ const MetaPairVector StrategyManager::getTerranBuildOrderGoal() const
 	int numVultures =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Vulture);
 
 	int marinesWanted = 5;
-	int factoriesWanted = 4;
+	int factoriesWanted = (BWAPI::Broodwar->getFrameCount() < 10000) ? 1 : 3;
 	int vulturesWanted = numVultures + 5;
 
-	//goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Marine, marinesWanted));
+	goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Marine, marinesWanted));
 
-	// build a factory
+	// build factories
 	goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Factory, factoriesWanted));
 
-	// build vultures and machine shops
+	// build vultures
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 0)
 	{
 		goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Vulture, vulturesWanted));
 	}
+
+	// build machine shops
+	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 0 &&
+		BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Machine_Shop) == 0)
+	{
+		goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Machine_Shop, 1));
+	}
+
+	// build ion thrusters
+	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Machine_Shop))
+	{
+		if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Ion_Thrusters) == 0)
+		{
+			goal.push_back(std::pair<MetaType, int>(BWAPI::UpgradeTypes::Ion_Thrusters, 1));
+		}
+
+		if (!BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Spider_Mines))
+		{
+			goal.push_back(std::pair<MetaType, int>(BWAPI::TechTypes::Spider_Mines, 1));
+		}
+	}
+
+	
 
 	return (const std::vector< std::pair<MetaType, UnitCountType> >)goal;
 }

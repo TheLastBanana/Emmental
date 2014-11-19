@@ -44,13 +44,6 @@ void ProductionManager::performBuildOrderSearch(const std::vector< std::pair<Met
 	std::vector<MetaType> buildOrder;
 	buildOrder = StarcraftBuildOrderSearchManager::Instance().findBuildOrder(goal);
 
-
-	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 0 && 
-		BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Machine_Shop) == 0)
-	{
-		buildOrder.push_back(BWAPI::UnitTypes::Terran_Machine_Shop);
-	}
-
 	// set the build order
 	setBuildOrder(buildOrder);
 }

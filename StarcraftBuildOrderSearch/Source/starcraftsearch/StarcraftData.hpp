@@ -99,6 +99,8 @@ class StarcraftData {
 			actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Starport, actions.size()));			// 11
 			actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Wraith, actions.size()));			// 12
 			actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Machine_Shop, actions.size()));		// 13
+			actions.push_back(StarcraftAction(BWAPI::UpgradeTypes::Ion_Thrusters, actions.size()));			// 14
+			actions.push_back(StarcraftAction(BWAPI::TechTypes::Spider_Mines, actions.size()));				// 15
 		}
 		else if (r == BWAPI::Races::Zerg)
 		{
