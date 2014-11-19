@@ -87,13 +87,3 @@ BunkerManager & BunkerManager::Instance()
 	static BunkerManager instance;
 	return instance;
 }
-
-/*void CombatCommander::assignIdleSquads(std::set<BWAPI::Unit *> & unitsToAssign)
-{
-	if (unitsToAssign.empty()) { return; }
-
-	UnitVector combatUnits(unitsToAssign.begin(), unitsToAssign.end());
-	unitsToAssign.clear();
-
-	squadData.addSquad(Squad(combatUnits, SquadOrder(SquadOrder::Defend, BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation()), 1000, "Defend Idle")));
-}*/
