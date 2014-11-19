@@ -98,8 +98,31 @@ void RangedManager::executeMicro(const UnitVector & targets)
 	// for each zealot
 	BOOST_FOREACH(BWAPI::Unit * rangedUnit, rangedUnits)
 	{
-		// train sub units such as scarabs or interceptors
-		//trainSubUnits(rangedUnit);
+		// low health; drop a mine before we die
+		/*
+		if (rangedUnit->getHitPoints() < 20 &&
+			rangedUnit->getSpiderMineCount() == 3) // TODO: make this only apply to the last mine
+		{
+			// don't act if we're trying to mine
+			if (!rangedUnit->isIdle() &&
+				rangedUnit->getLastCommand().getTechType() == BWAPI::TechTypes::Spider_Mines)
+			{
+				continue;
+			}
+
+			// drop a mine
+			else
+			{
+				bool success = rangedUnit->useTech(BWAPI::TechTypes::Spider_Mines, rangedUnit->getPosition());
+				if (success) BWAPI::Broodwar->printf("Placing mine");
+			}
+		}
+		*/
+		
+		if (rangedUnit->getOrder() == BWAPI::Orders::VultureMine || rangedUnit->getOrder() == BWAPI::Orders::PlaceMine)
+		{
+			continue;
+		}
 
 		// if the order is to attack or defend
 		if (order.type == order.Attack || order.type == order.Defend || order.type == order.Harass) {
@@ -233,11 +256,6 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 
 		BWAPI::Broodwar->drawLineMap(rangedUnit->getPosition().x(), rangedUnit->getPosition().y(),
 			fleePosition.x(), fleePosition.y(), BWAPI::Colors::Cyan);
-
-		if (rangedUnit->isStuck())
-		{
-			BWAPI::Broodwar->printf("Stuck!");
-		}
 
 		// no flee position found; just attack
 		if (!found)
