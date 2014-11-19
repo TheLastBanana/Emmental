@@ -5,6 +5,7 @@
 #include "base/BuildOrderQueue.h"
 #include "InformationManager.h"
 #include "base/WorkerManager.h"
+#include "BunkerManager.h"
 #include "base/StarcraftBuildOrderSearchManager.h"
 #include <sys/stat.h>
 #include <cstdlib>

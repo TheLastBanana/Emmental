@@ -59,6 +59,10 @@ void GameCommander::update()
 	StarcraftBuildOrderSearchManager::Instance().update(35 - timerManager.getTotalElapsed());
 	timerManager.stopTimer(TimerManager::Search);
 		
+	timerManager.startTimer(TimerManager::Building);
+	BunkerManager::Instance().update();
+	timerManager.stopTimer(TimerManager::Building);
+
 	timerManager.stopTimer(TimerManager::All);
 
 	drawDebugInterface();

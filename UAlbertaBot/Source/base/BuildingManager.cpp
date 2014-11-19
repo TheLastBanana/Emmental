@@ -174,8 +174,11 @@ BWAPI::TilePosition BuildingManager::getBuildingLocation(const Building & b)
 		{
 			// set the building padding specifically
 			int distance = 1;
-			if (b.type == BWAPI::UnitTypes::Terran_Missile_Turret || b.type == BWAPI::UnitTypes::Terran_Bunker)
+			if (b.type == BWAPI::UnitTypes::Terran_Missile_Turret)
 				distance = 0;
+			else if (b.type == BWAPI::UnitTypes::Terran_Bunker)
+				// to let vultures through
+				distance = 2;
 
 			// whether or not we want the distance to be horizontal only
             bool horizontalOnly = b.type == BWAPI::UnitTypes::Protoss_Citadel_of_Adun ? true : false;

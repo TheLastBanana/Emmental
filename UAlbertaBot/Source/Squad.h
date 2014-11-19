@@ -9,6 +9,7 @@
 #include "DistanceMap.hpp"
 #include "StrategyManager.h"
 #include "CombatSimulation.h"
+#include "BunkerManager.h"
 
 class ZealotManager;
 class DarkTemplarManager;

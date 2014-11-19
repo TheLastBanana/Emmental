@@ -690,6 +690,21 @@ const MetaPairVector StrategyManager::getTerranBuildOrderGoal() const
 	{
 		goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Vulture, vulturesWanted));
 	}
+	
+	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Barracks) > 0) {
+		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Bunker) < 2){
+			BWAPI::Broodwar->printf("wanna build bunker");
+			goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Bunker, 1));
+		}
+	}
+	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Bunker) > 0) {
+		BWAPI::Broodwar->printf("wanna spawn marine-bunker");
+		if (!BunkerManager::Instance().allBunkersFull()) {
+			int bunkerMarinesNeeded = BunkerManager::Instance().bunkerNeedsFilling();
+			BWAPI::Broodwar->printf("some bunkers are not full! Git marines %d", bunkerMarinesNeeded);
+			goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Marine, bunkerMarinesNeeded));
+		}
+	}
 
 	// build machine shops
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 0 &&
