@@ -112,13 +112,15 @@ void Squad::setManagerUnits()
 	UnitVector rangedUnits;
 	UnitVector detectorUnits;
 	UnitVector transportUnits;
+	UnitVector bunkerUnits;
+	int bunkerUnitsNum = 0;
 
 	// add units to micro managers
 	BOOST_FOREACH(BWAPI::Unit * unit, units)
 	{
 		if(unit->isCompleted() && unit->getHitPoints() > 0 && unit->exists())
 		{
-			// select dector units
+			// select detector units
 			if (unit->getType().isDetector() && !unit->getType().isBuilding())
 			{
 				detectorUnits.push_back(unit);
@@ -127,6 +129,11 @@ void Squad::setManagerUnits()
 			else if (unit->getType() == BWAPI::UnitTypes::Protoss_Shuttle || unit->getType() == BWAPI::UnitTypes::Terran_Dropship)
 			{
 				transportUnits.push_back(unit);
+			}
+			// select marines if need to fill any bunkers
+			else if (!BunkerManager::Instance().allBunkersFull() && unit->getType() == BWAPI::UnitTypes::Terran_Marine)
+			{
+				bunkerUnits.push_back(unit);
 			}
 			// select ranged units
 			else if ((unit->getType().groundWeapon().maxRange() > 32) || (unit->getType() == BWAPI::UnitTypes::Protoss_Reaver))
@@ -145,6 +152,7 @@ void Squad::setManagerUnits()
 	rangedManager.setUnits(rangedUnits);
 	detectorManager.setUnits(detectorUnits);
 	transportManager.setUnits(detectorUnits);
+	BunkerManager::Instance().setUnits(bunkerUnits);
 }
 
 // calculates whether or not to regroup
