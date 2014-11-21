@@ -1,16 +1,20 @@
-//should rename it to BunkerDefense?? since its not just building but also maintaining marines into it. 
 #pragma once
 
 #include "common.h"
 #include "micromanagement\MicroManager.h"
-//#include "squad.h"
 
 class MicroManager;
 
 class BunkerManager : public MicroManager
 {
-	void executeMicro(const UnitVector & targets);
+	// contains bunkers that need some marines
 	std::set<BWAPI::Unit*> bunkersToFill;
+
+	// not used.
+	void executeMicro(const UnitVector & targets);
+
+	// orders marines to go into empty bunkers.
+	void orderMarines() const;
 
 public:
 	
@@ -18,11 +22,15 @@ public:
 	~BunkerManager() {}
 
 	// returns the number of units needed to fill a bunker
-	int bunkerNeedsFilling();
+	int bunkerNeedsFilling() const;
+
+	// checks if bunkers need more marines or not, and then gets marines to enter them.
+	void update();
 
 	// returns true if all bunkers are full.
-	bool allBunkersFull();
+	bool allBunkersFull() const;
 
+	// returns the instance of BunkerManager
 	static BunkerManager & Instance();
-	void update();
+
 };

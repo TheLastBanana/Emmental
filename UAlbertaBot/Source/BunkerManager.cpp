@@ -8,7 +8,25 @@ void BunkerManager::executeMicro(const UnitVector & targets)
 	//targets.noCheeseForThem();
 }
 
-int BunkerManager::bunkerNeedsFilling()
+void BunkerManager::orderMarines() const
+{
+	// getting all units of this bunkerManager squad.
+	const UnitVector & bunkerFodder = getUnits();
+
+	std::set<BWAPI::Unit*>::const_iterator begin = bunkersToFill.begin();
+	std::set<BWAPI::Unit*>::const_iterator end = bunkersToFill.end();
+	std::set<BWAPI::Unit*>::const_iterator it = begin;
+
+	BOOST_FOREACH(BWAPI::Unit* unit, bunkerFodder){
+		if (it == end)
+			it = begin;
+		// command unit to go into a bunker (right now at any distance).
+		unit->rightClick(*it);
+		it++;
+	}
+}
+
+int BunkerManager::bunkerNeedsFilling() const
 {
 	std::set<BWAPI::Unit*> allOwnedUnits = BWAPI::Broodwar->self()->getUnits();
 	int numUnitsNeeded = 0;
@@ -23,7 +41,6 @@ int BunkerManager::bunkerNeedsFilling()
 				numUnitsNeeded += 4 - numInside;
 		}
 	}
-	//allBunkerFilled = numUnitsNeeded == 0;
 	return numUnitsNeeded;
 }
 
@@ -32,19 +49,16 @@ void BunkerManager::update()
 {
 	static int lastTime = 0;
 	int timeNow = BWAPI::Broodwar->elapsedTime();
-	
-	// set check to 3 seconds if all bunkers are filled, if bunkers need some marines 1 sec.
-	int check = bunkersToFill.size() == 0 ? 3 : 1;
-	
-	//check every couple seconds because this is expensive :(
-	if (timeNow - lastTime > check)
+
+	//check every second only because this is expensive :(
+	if (timeNow - lastTime > 1)
 	{
 		// Check and update if bunkers need some marines.
 		std::set<BWAPI::Unit*> allOwnedUnits = BWAPI::Broodwar->self()->getUnits();
 		BOOST_FOREACH(BWAPI::Unit * bunker, allOwnedUnits)
 		{
 			BWAPI::UnitType type = bunker->getType();
-			// remove any full bunker that is found within the yet-to-fill-container.
+			// remove any full bunker or dead that is found within the yet-to-fill-container.
 			if (type == BWAPI::UnitTypes::Terran_Bunker && (bunker->getHitPoints() == 0 || bunker->getLoadedUnits().size() == 4))
 			{
 				std::set<BWAPI::Unit*>::iterator inList = bunkersToFill.find(bunker);
@@ -58,26 +72,18 @@ void BunkerManager::update()
 				// Check if there are empty spots. Bunker can hold maximum 4 marines.
 				if (numInside < 4)
 					// pushing it multiple times so it can be assigned to a unit to get in easily/lazily
-					for (int i = 0; i < 4-numInside; ++i)
-						bunkersToFill.insert(bunker);
+					bunkersToFill.insert(bunker);
 			}
 		}
+		// Order marines into the bunkers if there are bunkers to fill.
 		if (bunkersToFill.size() != 0)
-		{
-			// getting all units of this bunkerManager squad.
-			const UnitVector & bunkerFodder = getUnits(); 
-			BOOST_FOREACH(BWAPI::Unit* unit, bunkerFodder){
-				BOOST_FOREACH(BWAPI::Unit* bunker, bunkersToFill){
-					// command unit to go into the bunker (right now at any distance...).
-						unit->rightClick(bunker);
-				}
-			}
-		}
+			orderMarines();
+
 		lastTime = BWAPI::Broodwar->elapsedTime();
 	}
 }
 
-bool BunkerManager::allBunkersFull()
+bool BunkerManager::allBunkersFull() const
 {
 	return bunkersToFill.size() == 0;
 }

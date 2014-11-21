@@ -708,11 +708,9 @@ const MetaPairVector StrategyManager::getTerranBuildOrderGoal() const
 		}
 	}
 	// train marines for bunkers
-	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Bunker) > 0) {
-		if (!BunkerManager::Instance().allBunkersFull()) {
-			int bunkerMarinesNeeded = BunkerManager::Instance().bunkerNeedsFilling();
-			goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Marine, bunkerMarinesNeeded));
-		}
+	if (!BunkerManager::Instance().allBunkersFull()) {
+		int bunkerMarinesNeeded = BunkerManager::Instance().bunkerNeedsFilling();
+		goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Marine, bunkerMarinesNeeded));
 	}
 
 	// build machine shops
