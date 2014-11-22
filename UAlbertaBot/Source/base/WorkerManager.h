@@ -3,6 +3,7 @@
 #include <Common.h>
 #include "BuildingManager.h"
 #include "WorkerData.h"
+#include "BunkerManager.h"
 
 class Building;
 

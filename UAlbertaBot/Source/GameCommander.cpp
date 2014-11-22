@@ -295,6 +295,7 @@ void GameCommander::onUnitHide(BWAPI::Unit * unit)
 void GameCommander::onUnitCreate(BWAPI::Unit * unit)		
 { 
 	InformationManager::Instance().onUnitCreate(unit); 
+	BunkerManager::Instance().onUnitCreate(unit);
 }
 
 void GameCommander::onUnitRenegade(BWAPI::Unit * unit)		
@@ -307,6 +308,7 @@ void GameCommander::onUnitDestroy(BWAPI::Unit * unit)
 	ProductionManager::Instance().onUnitDestroy(unit);
 	WorkerManager::Instance().onUnitDestroy(unit);
 	InformationManager::Instance().onUnitDestroy(unit); 
+	BunkerManager::Instance().onUnitDestroyed(unit);
 }
 
 void GameCommander::onUnitMorph(BWAPI::Unit * unit)		

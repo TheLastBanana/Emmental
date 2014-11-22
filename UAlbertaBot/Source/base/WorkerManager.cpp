@@ -40,6 +40,13 @@ void WorkerManager::updateWorkerStatus()
 			continue;
 		}
 
+		// if worker is a bunker slave
+		if (BunkerManager::Instance().getBunkerSlave() == worker)
+		{
+			BunkerManager::Instance().updateBunkerSlave();
+			continue;
+		}
+
 		// if it's idle
 		if (worker->isIdle() && 
 			(workerData.getWorkerJob(worker) != WorkerData::Build) && 
@@ -61,6 +68,13 @@ void WorkerManager::updateWorkerStatus()
 			{
 				setMineralWorker(worker);
 			}
+		}
+
+		// if bunker needs a repair slave SCV, set it if its mineral worker or idle.
+		if (BunkerManager::Instance().bunkersExists() && BunkerManager::Instance().bunkerRepairEmpty() && isFree(worker))
+		{
+			workerData.setWorkerJob(worker, WorkerData::Default, NULL);
+			BunkerManager::Instance().setBunkerSlave(worker);
 		}
 	}
 }
