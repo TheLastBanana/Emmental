@@ -323,7 +323,20 @@ void BuildingManager::checkForStartedConstruction()
 }
 
 // STEP 5: IF WE ARE TERRAN, THIS MATTERS, SO: LOL
-void BuildingManager::checkForDeadTerranBuilders() {}
+void BuildingManager::checkForDeadTerranBuilders() {
+	static int lastTime = 0;
+	int timeNow = BWAPI::Broodwar->elapsedTime();
+	if (timeNow - lastTime >= 4)
+	{
+		std::set<BWAPI::Unit*> allOwnedUnits = BWAPI::Broodwar->self()->getUnits();
+		BOOST_FOREACH(BWAPI::Unit* building, allOwnedUnits)
+		{
+			if (!building->isCompleted() && !building->isBeingConstructed())
+				building->cancelConstruction();
+		}
+		lastTime = BWAPI::Broodwar->elapsedTime();
+	}
+}
 
 // STEP 6: CHECK FOR COMPLETED BUILDINGS
 void BuildingManager::checkForCompletedBuildings() {
