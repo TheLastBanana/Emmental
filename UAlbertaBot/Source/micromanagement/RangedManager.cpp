@@ -2,10 +2,15 @@
 #include "RangedManager.h"
 
 // Get effective range of unit, taking into account the fact that it can move
-double getEffectiveRange(BWAPI::Unit * unit)
+double getEffectiveRange(const BWAPI::Unit * ourUnit, const BWAPI::Unit * enemyUnit)
 {
 	double speedWeight = 1.5;
-	return unit->getType().groundWeapon().maxRange() + unit->getType().topSpeed() * speedWeight;
+	BWAPI::UnitType enemyType = enemyUnit->getType();
+	int maxRange = ourUnit->getType().isFlyer() ?
+				   enemyType.airWeapon().maxRange() :
+				   enemyType.groundWeapon().maxRange();
+
+	return maxRange + enemyType.topSpeed() * speedWeight;
 }
 
 RangedManager::RangedManager() { }
@@ -23,9 +28,12 @@ bool RangedManager::checkFleePosition(const BWAPI::Unit * rangedUnit, const Unit
 	BOOST_FOREACH(BWAPI::Unit * enemy, BWAPI::Broodwar->enemy()->getUnits())
 	{
 		// ignore the enemy if it's not going to damage us
-		if (enemy->getType().groundWeapon().damageAmount() == 0 || enemy->getType().isWorker()) continue;
+		BWAPI::UnitType rangedUnitType = rangedUnit->getType();
+		BWAPI::UnitType targetType = enemy->getType();
+		bool canAttackUs = rangedUnitType.isFlyer() ? targetType.airWeapon() != BWAPI::WeaponTypes::None : targetType.groundWeapon() != BWAPI::WeaponTypes::None;
+		if (!canAttackUs || enemy->getType().isWorker()) continue;
 
-		if (enemy->getDistance(fleePosition) < getEffectiveRange(enemy))
+		if (enemy->getDistance(fleePosition) < getEffectiveRange(rangedUnit, enemy))
 		{
 			return false;
 		}
@@ -60,10 +68,7 @@ void RangedManager::flee(BWAPI::Unit * rangedUnit, const BWAPI::Position & fleeP
 		offset.normalise();
 		offset = offset * push;
 
-		tempPosition += offset;
-
-		BWAPI::Broodwar->drawLineMap(test.x(), test.y(), test.x() + offset.x, test.y() + offset.y, BWAPI::Colors::Cyan);
-	}
+		tempPosition += offset;	}
 
 	// If the new position isn't free, just use let pathfinding do the work
 	if (!checkPositionWalkable(tempPosition))
@@ -167,11 +172,11 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 	double range(rangedUnit->getType().groundWeapon().maxRange());
 	if (rangedUnit->getType() == BWAPI::UnitTypes::Protoss_Dragoon && BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Singularity_Charge))
 	{
-		range = 6*32;
+		range = 6 * 32;
 	}
 
 	// determine whether the target can be kited
-	if (range <= getEffectiveRange(target))
+	if (range <= getEffectiveRange(rangedUnit, target))
 	{
 		// if we can't kite it, there's no point
 		smartAttackUnit(rangedUnit, target);
@@ -184,7 +189,10 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 	double		speed(rangedUnit->getType().topSpeed());
 
 	// don't kite damageless enemies
-	if (target->getType().groundWeapon() == BWAPI::WeaponTypes::None) {
+	bool isFlyer = rangedUnit->getType().isFlyer();
+	if ((isFlyer && target->getType().groundWeapon() == BWAPI::WeaponTypes::None) ||
+		(!isFlyer && target->getType().airWeapon() == BWAPI::WeaponTypes::None))
+	{
 		kite = false;
 	}
 
