@@ -186,8 +186,18 @@ BWAPI::TilePosition BuildingManager::getBuildingLocation(const Building & b)
 			// set the location with priority on positions in our own region, unless bunker.
 			if (b.type.getID() == BWAPI::UnitTypes::Terran_Bunker)
 			{
-				// finding nearest chokepoint to base
-				BWAPI::TilePosition position = MapTools::Instance().getClosestChokepoint(BWAPI::Broodwar->self()->getStartLocation());
+				BWAPI::TilePosition position = BWAPI::TilePositions::None;
+
+				if (BunkerManager::Instance().allBunkers().size() > 0){
+					// place next bunker near other bunker
+					BWAPI::Unit* bunker = *BunkerManager::Instance().allBunkers().begin();
+					position = BWAPI::TilePosition(bunker->getPosition());
+				}
+				else
+				{
+					// finding nearest chokepoint to base
+					position = MapTools::Instance().getClosestChokepoint(BWAPI::Broodwar->self()->getStartLocation());
+				}
 
 				BWAPI::TilePosition bunkerLocation = BuildingPlacer::Instance().getBuildLocationNear(b, distance, false, false, position);
 				testLocation = bunkerLocation;

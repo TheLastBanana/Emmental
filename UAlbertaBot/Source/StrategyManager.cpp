@@ -703,14 +703,17 @@ const MetaPairVector StrategyManager::getTerranBuildOrderGoal() const
 	
 	// build bunkers
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Barracks) > 0) {
-		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Bunker) < 1){
+		if (BunkerManager::Instance().allBunkers().size() < 2){
 			goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Bunker, 1));
 		}
 	}
 	// train marines for bunkers
 	if (!BunkerManager::Instance().allBunkersFull()) {
 		int bunkerMarinesNeeded = BunkerManager::Instance().bunkerNeedsFilling();
-		goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Marine, bunkerMarinesNeeded));
+		// loop because (from what I heard) if this exceeds the number of current available marine training slots
+		//  they will just build more Barracks to accomodate for extra training slots.
+		for (int i = 0; i < bunkerMarinesNeeded; i++)
+			goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Marine, 1));
 	}
 
 	// build machine shops

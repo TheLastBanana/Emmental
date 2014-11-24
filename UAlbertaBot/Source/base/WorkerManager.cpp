@@ -32,6 +32,9 @@ void WorkerManager::update()
 
 void WorkerManager::updateWorkerStatus() 
 {
+	// the scv slave
+	BWAPI::Unit* slave = 0;
+
 	// for each of our Workers
 	BOOST_FOREACH (BWAPI::Unit * worker, workerData.getWorkers())
 	{
@@ -71,11 +74,19 @@ void WorkerManager::updateWorkerStatus()
 		}
 
 		// if bunker needs a repair slave SCV, set it if its mineral worker or idle.
-		if (BunkerManager::Instance().bunkersExists() && BunkerManager::Instance().bunkerRepairEmpty() && isFree(worker))
+		if (BunkerManager::Instance().allBunkers().size() > 0 && BunkerManager::Instance().bunkerRepairEmpty() && isFree(worker))
 		{
-			workerData.setWorkerJob(worker, WorkerData::Default, NULL);
-			BunkerManager::Instance().setBunkerSlave(worker);
+			BWAPI::Unit* bunker = *BunkerManager::Instance().allBunkers().begin();
+			if (slave == 0)
+				slave = worker;
+			else if (slave->getDistance(bunker) > worker->getDistance(bunker))
+				slave = worker;
 		}
+	}
+	if (BunkerManager::Instance().bunkerRepairEmpty() && slave != 0)
+	{
+		workerData.setWorkerJob(slave, WorkerData::Default, NULL);
+		BunkerManager::Instance().setBunkerSlave(slave);
 	}
 }
 

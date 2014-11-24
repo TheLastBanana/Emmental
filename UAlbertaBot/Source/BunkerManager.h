@@ -13,7 +13,7 @@ class BunkerManager : public MicroManager
 	// contains bunkers that need some marines
 	std::set<BWAPI::Unit*> bunkersToFill;
 
-	BWAPI::Unit* bunkerToRepair;
+	std::set<BWAPI::Unit*> bunkerToRepairSet;
 	BWAPI::Unit* bunkerRepairSlave;
 
 	// not used.
@@ -24,7 +24,7 @@ class BunkerManager : public MicroManager
 
 public:
 	
-	BunkerManager() { bunkerRepairSlave = bunkerToRepair = 0; }
+	BunkerManager() { bunkerRepairSlave = 0; }
 	~BunkerManager() {}
 
 	// if a bunker is made add it to bunkerlist
@@ -42,8 +42,8 @@ public:
 	// returns true if all bunkers are full.
 	bool allBunkersFull() const;
 
-	// returns true if there exist bunkers.
-	bool BunkerManager::bunkersExists() const;
+	// returns the number of bunkers that exist.
+	const std::set<BWAPI::Unit*> &allBunkers() const;
 
 	// adds a unit (should be SCV) to the repair function.
 	void setBunkerSlave(BWAPI::Unit* slave);
