@@ -30,7 +30,9 @@ bool RangedManager::checkFleePosition(const BWAPI::Unit * rangedUnit, const Unit
 		// ignore the enemy if it's not going to damage us
 		BWAPI::UnitType rangedUnitType = rangedUnit->getType();
 		BWAPI::UnitType targetType = enemy->getType();
-		bool canAttackUs = rangedUnitType.isFlyer() ? targetType.airWeapon() != BWAPI::WeaponTypes::None : targetType.groundWeapon() != BWAPI::WeaponTypes::None;
+		bool canAttackUs = rangedUnitType.isFlyer() ?
+						   (targetType.airWeapon() != BWAPI::WeaponTypes::None) :
+						   (targetType.groundWeapon() != BWAPI::WeaponTypes::None);
 		if (!canAttackUs || enemy->getType().isWorker()) continue;
 
 		if (enemy->getDistance(fleePosition) < getEffectiveRange(rangedUnit, enemy))
@@ -190,8 +192,8 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 
 	// don't kite damageless enemies
 	bool isFlyer = rangedUnit->getType().isFlyer();
-	if ((isFlyer && target->getType().groundWeapon() == BWAPI::WeaponTypes::None) ||
-		(!isFlyer && target->getType().airWeapon() == BWAPI::WeaponTypes::None))
+	if ((!isFlyer && target->getType().groundWeapon() == BWAPI::WeaponTypes::None) ||
+		(isFlyer && target->getType().airWeapon() == BWAPI::WeaponTypes::None))
 	{
 		kite = false;
 	}
@@ -336,7 +338,9 @@ int RangedManager::getAttackPriority(BWAPI::Unit * rangedUnit, BWAPI::Unit * tar
 	BWAPI::UnitType rangedUnitType = rangedUnit->getType();
 	BWAPI::UnitType targetType = target->getType();
 
-	bool canAttackUs = rangedUnitType.isFlyer() ? targetType.airWeapon() != BWAPI::WeaponTypes::None : targetType.groundWeapon() != BWAPI::WeaponTypes::None;
+	bool canAttackUs = rangedUnitType.isFlyer() ?
+		(targetType.airWeapon() != BWAPI::WeaponTypes::None) :
+		(targetType.groundWeapon() != BWAPI::WeaponTypes::None);
 
 	// harass prioritizes workers
 	if (order.type == order.Harass && targetType.isWorker())
