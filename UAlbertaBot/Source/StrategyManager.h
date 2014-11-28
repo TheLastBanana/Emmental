@@ -7,6 +7,7 @@
 #include "base/WorkerManager.h"
 #include "BunkerManager.h"
 #include "base/StarcraftBuildOrderSearchManager.h"
+#include "base/BuildOrderGoalManager.h"
 #include <sys/stat.h>
 #include <cstdlib>
 
@@ -57,7 +58,7 @@ class StrategyManager
 	const	std::string			getProtossDragoonsOpeningBook() const;
 	const	MetaPairVector		getProtossDragoonsBuildOrderGoal() const;
 
-	const	MetaPairVector		getTerranBuildOrderGoal() const;
+	const	BOGIVector			getTerranBuildOrderGoal() const;
 	const	MetaPairVector		getZergBuildOrderGoal() const;
 
 	const	MetaPairVector		getProtossOpeningBook() const;
@@ -81,6 +82,6 @@ public:
 
 	const	int					getCurrentStrategy();
 
-	const	MetaPairVector		getBuildOrderGoal();
+	const	BOGIVector			getBuildOrderGoal();
 	const	std::string			getOpeningBook() const;
 };

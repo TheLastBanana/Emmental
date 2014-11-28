@@ -24,7 +24,7 @@ UAlbertaBotModule::~UAlbertaBotModule() {}
 
 void UAlbertaBotModule::onStart()
 {
-	BWAPI::Broodwar->setLocalSpeed(-1);
+	BWAPI::Broodwar->setLocalSpeed(0);
 	//BWAPI::Broodwar->setFrameSkip(240);
 
     SparCraft::init();
@@ -110,6 +110,11 @@ void UAlbertaBotModule::onFrame()
 	if (Options::Modules::USING_MICRO_SEARCH)
 	{
 		//micro.update();
+	}
+
+	if (BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Spider_Mines))
+	{
+		//BWAPI::Broodwar->setLocalSpeed(-1);
 	}
 
 

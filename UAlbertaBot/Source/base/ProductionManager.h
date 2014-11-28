@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Common.h>
+#include "BuildOrderGoalManager.h"
 #include "BuildOrderQueue.h"
 #include "BuildingManager.h"
 #include "StarcraftBuildOrderSearchManager.h"
@@ -33,7 +34,7 @@ class ProductionManager
 	bool						initialBuildSet;
 
 	std::map<char, MetaType>	typeCharMap;
-	std::vector< std::pair<MetaType, UnitCountType> > searchGoal;
+	//std::vector< std::pair<MetaType, UnitCountType> > searchGoal;
 
 	bool						assignedWorkerForThisBuilding;
 	bool						haveLocationForThisBuilding;
@@ -53,6 +54,7 @@ class ProductionManager
 	bool						hasNumCompletedUnitType(BWAPI::UnitType type, int num);
 	bool						meetsReservedResources(MetaType type);
 	void						setBuildOrder(const std::vector<MetaType> & buildOrder);
+	void						setBuildOrder(const BuildOrder & buildOrder);
 	void						createMetaType(BWAPI::Unit * producer, MetaType type);
 	void						manageBuildOrderQueue();
 	void						performCommand(BWAPI::UnitCommandType t);
@@ -74,8 +76,9 @@ public:
 	void						onGameEnd();
 	void						onUnitMorph(BWAPI::Unit * unit);
 	void						onUnitDestroy(BWAPI::Unit * unit);
-	
+
 	void						performBuildOrderSearch(const std::vector< std::pair<MetaType, UnitCountType> > & goal);
+	void						performBuildOrderSearch(const std::vector<BuildOrderGoalItem> & goal);
 	void						drawProductionInformation(int x, int y);
 	void						setSearchGoal(MetaPairVector & goal);
 };

@@ -39,6 +39,19 @@ void ProductionManager::setBuildOrder(const std::vector<MetaType> & buildOrder)
 	}
 }
 
+void ProductionManager::setBuildOrder(const BuildOrder & buildOrder)
+{
+	// clear the current build order
+	queue.clearAll();
+
+	// for each item in the results build order, add it
+	for (size_t i(0); i<buildOrder.size(); ++i)
+	{
+		// queue the item
+		queue.queueAsLowestPriority(buildOrder[i].first, buildOrder[i].second);
+	}
+}
+
 void ProductionManager::performBuildOrderSearch(const std::vector< std::pair<MetaType, UnitCountType> > & goal)
 {
 	std::vector<MetaType> buildOrder;
@@ -48,9 +61,20 @@ void ProductionManager::performBuildOrderSearch(const std::vector< std::pair<Met
 	setBuildOrder(buildOrder);
 }
 
+void ProductionManager::performBuildOrderSearch(const std::vector<BuildOrderGoalItem> & goal)
+{
+	BuildOrder buildOrder;
+
+	BuildOrderGoalManager bogi(goal);
+	bogi.getBuildOrder(buildOrder);
+
+	// set the build order
+	setBuildOrder(buildOrder);
+}
+
 void ProductionManager::setSearchGoal(MetaPairVector & goal)
 {
-	searchGoal = goal;
+	//searchGoal = goal;
 }
 
 void ProductionManager::update() 
@@ -67,18 +91,19 @@ void ProductionManager::update()
 
 		return;
 	}
-
+	
+	/*
 	if ((queue.size() == 0) && Options::Modules::USING_BUILD_ORDER_DEMO)
 	{
 		performBuildOrderSearch(searchGoal);
 	}
+	*/
 
 	// if nothing is currently building, get a new goal from the strategy manager
 	if ((queue.size() == 0) && (BWAPI::Broodwar->getFrameCount() > 10) && !Options::Modules::USING_BUILD_ORDER_DEMO)
 	{
 		BWAPI::Broodwar->drawTextScreen(150, 10, "Nothing left to build, new search!");
-		const std::vector< std::pair<MetaType, UnitCountType> > newGoal = StrategyManager::Instance().getBuildOrderGoal();
-		performBuildOrderSearch(newGoal);
+			performBuildOrderSearch(StrategyManager::Instance().getBuildOrderGoal());
 	}
 
 	//// detect if there's a build order deadlock once per second

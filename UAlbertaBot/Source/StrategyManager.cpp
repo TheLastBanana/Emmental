@@ -433,8 +433,10 @@ const bool StrategyManager::expandProtossZealotRush() const
 	return false;
 }
 
-const MetaPairVector StrategyManager::getBuildOrderGoal()
+const BOGIVector StrategyManager::getBuildOrderGoal()
 {
+	// Now that we've replaced the system, everything else is broken, so don't try to use these
+	/*
 	if (BWAPI::Broodwar->self()->getRace() == BWAPI::Races::Protoss)
 	{
 		if (getCurrentStrategy() == ProtossZealotRush)
@@ -461,6 +463,9 @@ const MetaPairVector StrategyManager::getBuildOrderGoal()
 	{
 		return getZergBuildOrderGoal();
 	}
+	*/
+
+	return getTerranBuildOrderGoal();
 }
 
 const MetaPairVector StrategyManager::getProtossDragoonsBuildOrderGoal() const
@@ -678,10 +683,10 @@ const MetaPairVector StrategyManager::getProtossZealotRushBuildOrderGoal() const
 // * If a supply deadlock is detected (we have too little supply to build a unit)
 // * If a critical unit (building or worker) has died
 // * If an enemy cloaked unit is detected
-const MetaPairVector StrategyManager::getTerranBuildOrderGoal() const
+const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 {
 	// the goal to return
-	std::vector< std::pair<MetaType, UnitCountType> > goal;
+	BOGIVector goal;
 	//if (BWAPI::Broodwar->self()->minerals() < 500) BWAPI::Broodwar->printf("<your-name> <your-student-id>");
 	//int numMarines =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Marine);
 	int numVultures =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Vulture);
@@ -689,21 +694,21 @@ const MetaPairVector StrategyManager::getTerranBuildOrderGoal() const
 	int marinesWanted = 5;
 	int factoriesWanted = (BWAPI::Broodwar->getFrameCount() < 10000) ? 1 : 3;
 	int vulturesWanted = numVultures + 5;
-	goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Marine, marinesWanted));
+	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Marine, marinesWanted));
 
 	// build factories
-	goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Factory, factoriesWanted));
+	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Factory, factoriesWanted));
 
 	// build vultures
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 0)
 	{
-		goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Vulture, vulturesWanted));
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Vulture, vulturesWanted));
 	}
 	
 	// build bunkers
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Barracks) > 0) {
 		if (BunkerManager::Instance().allBunkers().size() < 2){
-			goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Bunker, 1));
+			goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Bunker, 1));
 		}
 	}
 	// train marines for bunkers
@@ -712,14 +717,14 @@ const MetaPairVector StrategyManager::getTerranBuildOrderGoal() const
 		// loop because (from what I heard) if this exceeds the number of current available marine training slots
 		//  they will just build more Barracks to accomodate for extra training slots.
 		for (int i = 0; i < bunkerMarinesNeeded; i++)
-			goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Marine, 1));
+			goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Marine, 1));
 	}
 
 	// build machine shops
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 0 &&
 		BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Machine_Shop) == 0)
 	{
-		goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Machine_Shop, 1));
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Machine_Shop, 1));
 	}
 
 	// build ion thrusters
@@ -727,52 +732,52 @@ const MetaPairVector StrategyManager::getTerranBuildOrderGoal() const
 	{
 		if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Ion_Thrusters) == 0)
 		{
-			goal.push_back(std::pair<MetaType, int>(BWAPI::UpgradeTypes::Ion_Thrusters, 1));
+			goal.push_back(BuildOrderGoalItem(BWAPI::UpgradeTypes::Ion_Thrusters, 1));
 		}
 
 		if (!BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Spider_Mines))
 		{
-			goal.push_back(std::pair<MetaType, int>(BWAPI::TechTypes::Spider_Mines, 1));
+			goal.push_back(BuildOrderGoalItem(BWAPI::TechTypes::Spider_Mines, 1));
 		}
 	}
 
 	//build starport
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 2)
 	{
-		goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Starport, 2));
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Starport, 2));
 	}
 	
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Starport) > 0)
 	{
-		goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Wraith, 6));
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Wraith, 6));
 	}
 
 	//If we have a ton of extra money we should try to spend it.
 	//This isn't working.
 	//if (BWAPI::Broodwar->self()->minerals() > 800) {
 	//if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 2)
-		//goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Factory, 1));
+		//goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Factory, 1));
 		//if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Armory) < 1) {
 		//{
-			//goal.push_back(std::pair<MetaType, int>(BWAPI::UnitTypes::Terran_Armory, 1));
+			//goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Armory, 1));
 		//}
 	//}
 
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Armory) > 0) {
 		if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Terran_Vehicle_Weapons) < 2)
 		{
-			goal.push_back(std::pair<MetaType, int>(BWAPI::UpgradeTypes::Terran_Vehicle_Weapons, 1));
+			goal.push_back(BuildOrderGoalItem(BWAPI::UpgradeTypes::Terran_Vehicle_Weapons, 1));
 		}
 		
 		if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Terran_Vehicle_Plating) < 2)
 		{
-			goal.push_back(std::pair<MetaType, int>(BWAPI::UpgradeTypes::Terran_Vehicle_Plating, 1));
+			goal.push_back(BuildOrderGoalItem(BWAPI::UpgradeTypes::Terran_Vehicle_Plating, 1));
 		}
 	}
 
 	
 
-	return (const std::vector< std::pair<MetaType, UnitCountType> >)goal;
+	return goal;
 }
 
 const MetaPairVector StrategyManager::getZergBuildOrderGoal() const

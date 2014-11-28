@@ -3,84 +3,56 @@
 #include "Common.h"
 #include "MetaType.h"
 
-class BuildOrderGoalItem
+typedef std::vector<std::pair<MetaType, bool> > BuildOrder;
+
+struct BuildOrderGoalItem
 {
-	// the MetaType to be constructed
-	MetaType	_metaType;
+	// the unit to build
+	MetaType metaType;
 
-	// the number we wish to construct
-	int			_num;
+	// the number to build
+	int count;
 
-public:
-
-	// constructor
-	BuildOrderGoalItem(const MetaType & t, const int n) : _metaType(t), _num(n) {}
-
-	// getters
-	const MetaType & metaType()	const	{ return _metaType; }
-	const int num() const				{ return _num; }
-
-
-};
-
-class BuildOrderGoal
-{
-	// the goals
-	std::vector<BuildOrderGoalItem>		goal;
-
-	// priority
+	// the priority to build this (less than 0 means use default)
 	int priority;
 
-public:
-	
-	BuildOrderGoal() : priority(0) {}
-	BuildOrderGoal(const int p) : priority(p) {}
-	~BuildOrderGoal() {}
+	// whether we should block other things from being constructed while this is building
+	bool blocking;
 
-	void addItem(const BuildOrderGoalItem & bogi)
-	{
-		goal.push_back(bogi);
-	}
+	BuildOrderGoalItem(const MetaType & metaType, int count = 1, int priority = -1, bool blocking = true);
+};
 
-	void setPriority(const int p)
-	{
-		priority = p;
-	}
+typedef std::vector<BuildOrderGoalItem> BOGIVector;
 
-	const int getPriority() const
-	{
-		return priority;
-	}
+struct BuildOrderGoal
+{
+	BOGIVector items;
 
-	const std::vector<BuildOrderGoalItem> & getGoal() const
+	int priority;
+
+	BuildOrderGoal(int priority) : priority(priority) {}
+
+	void addItem(const BuildOrderGoalItem & item)
 	{
-		return goal;
+		items.push_back(item);
 	}
 
 	bool operator < (const BuildOrderGoal & bog)
 	{
-		return getPriority() < bog.getPriority();
+		return priority < bog.priority;
 	}
 };
 
 class BuildOrderGoalManager {
+	std::vector<BuildOrderGoal>	goals;
 
-	std::vector<BuildOrderGoal>		goals;
-
-	// add a build order goal item with a priority
-	void				addGoal(const MetaType t, int num, int p);
-
-	// checks to see if a goal is completed by using BWAPI data
-	bool				isCompleted(const BuildOrderGoal & bog) const;
-	
-	// set the build order goals based on expert knowledge
-	void				setBuildOrderGoals();
+	// checks to see if a goal item is completed by using BWAPI data
+	bool isCompleted(const BuildOrderGoalItem & bogi) const;
 
 public:
 
-	BuildOrderGoalManager();
-	~BuildOrderGoalManager();
+	BuildOrderGoalManager(const BOGIVector & items);
 
-	// gets the highest priority goal which isn't completed
-	BuildOrderGoal &	getNextBuildOrderGoal() const;
+	// gets a vector of the highest-priority build orders which haven't been completed
+	void BuildOrderGoalManager::getBuildOrder(BuildOrder & buildOrder);
 };
