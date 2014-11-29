@@ -115,6 +115,8 @@ BuildOrderGoalManager::BuildOrderGoalManager(const BOGIVector & items)
 
 void BuildOrderGoalManager::getBuildOrder(std::vector<std::pair<MetaType, bool> > & buildOrder)
 {
+	int supplyRemaining = BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed();
+
 	BOOST_FOREACH(BuildOrderGoal & bog, goals)
 	{
 		bool complete = false;
@@ -132,6 +134,18 @@ void BuildOrderGoalManager::getBuildOrder(std::vector<std::pair<MetaType, bool> 
 
 					// subtract one so that it's considered as a built unit
 					--bogi.count;
+
+					// decrease projected supply amount
+					supplyRemaining -= bogi.metaType.supplyRequired();
+
+					// build more supply providers
+					if (supplyRemaining < 10)
+					{
+						BWAPI::UnitType type = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
+
+						buildOrder.push_back(std::pair<MetaType, bool>(type, false));
+						supplyRemaining += type.supplyProvided();
+					}
 
 					complete = false;
 				}
