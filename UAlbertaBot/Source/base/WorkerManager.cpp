@@ -45,7 +45,7 @@ void WorkerManager::updateWorkerStatus()
 
 		// if it's idle
 		if (worker->isIdle() && 
-			(workerData.getWorkerJob(worker) != WorkerData::Build) && 
+			(workerData.getWorkerJob(worker) != WorkerData::Build) &&
 			(workerData.getWorkerJob(worker) != WorkerData::Move) &&
 			(workerData.getWorkerJob(worker) != WorkerData::Scout))
 		{
@@ -53,6 +53,10 @@ void WorkerManager::updateWorkerStatus()
 			// set its job to idle
 			workerData.setWorkerJob(worker, WorkerData::Idle, NULL);
 		}
+
+		// if its building and idle which means its building has been killed
+		if (worker->isIdle() && workerData.getWorkerJob(worker) == WorkerData::Build && !worker->isConstructing())
+			workerData.setWorkerJob(worker, WorkerData::Idle, NULL);
 
 		// if its job is gas
 		if (workerData.getWorkerJob(worker) == WorkerData::Gas)
