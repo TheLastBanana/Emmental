@@ -26,7 +26,7 @@ BuildOrderGoalItem::BuildOrderGoalItem(const MetaType & metaType, int count, int
 	}
 }
 
-bool BuildOrderGoalManager::isCompleted(BuildOrderGoalItem & bogi) const
+bool BuildOrderGoalManager::isCompleted(const BuildOrderGoalItem & bogi) const
 {
 	if (bogi.metaType.type == MetaType::Unit)
 	{
@@ -78,6 +78,12 @@ bool BuildOrderGoalManager::isCompleted(BuildOrderGoalItem & bogi) const
 BuildOrderGoalManager::BuildOrderGoalManager(const BOGIVector & items)
 {
 	BOOST_FOREACH(const BuildOrderGoalItem & item, items) {
+		// don't bother queueing if it's done
+		if (isCompleted(item))
+		{
+			continue;
+		}
+
 		// see if an item with this priority already exists
 		int existingIndex = -1;
 		for (int i(0); i < (int)goals.size(); ++i)

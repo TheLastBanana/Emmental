@@ -47,7 +47,7 @@ class BuildOrderGoalManager {
 	std::vector<BuildOrderGoal>	goals;
 
 	// checks to see if a goal item is completed by using BWAPI data
-	bool isCompleted(BuildOrderGoalItem & bogi) const;
+	bool isCompleted(const BuildOrderGoalItem & bogi) const;
 
 public:
 
