@@ -18,12 +18,12 @@ struct MetaType {
 	MetaType (BWAPI::UpgradeType t) :     upgradeType(t), type(MetaType::Upgrade) {}
 	MetaType (BWAPI::UnitCommandType t) : commandType(t), type(MetaType::Command) {}
 
-	bool isUnit()		{ return type == Unit; }
-	bool isTech()		{ return type == Tech; }
-	bool isUpgrade()	{ return type == Upgrade; }
-	bool isCommand()	{ return type == Command; }
-	bool isBuilding()	{ return type == Unit && unitType.isBuilding(); }
-	bool isRefinery()	{ return isBuilding() && unitType.isRefinery(); }
+	bool isUnit() const		{ return type == Unit; }
+	bool isTech() const		{ return type == Tech; }
+	bool isUpgrade() const	{ return type == Upgrade; }
+	bool isCommand() const	{ return type == Command; }
+	bool isBuilding() const	{ return type == Unit && unitType.isBuilding(); }
+	bool isRefinery() const	{ return isBuilding() && unitType.isRefinery(); }
 
 	int supplyRequired()
 	{
