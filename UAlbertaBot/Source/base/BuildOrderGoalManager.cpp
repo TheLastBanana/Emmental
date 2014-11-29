@@ -26,15 +26,32 @@ BuildOrderGoalItem::BuildOrderGoalItem(const MetaType & metaType, int count, int
 	}
 }
 
-bool BuildOrderGoalManager::isCompleted(const BuildOrderGoalItem & bogi) const
+bool BuildOrderGoalManager::isCompleted(BuildOrderGoalItem & bogi) const
 {
 	if (bogi.metaType.type == MetaType::Unit)
 	{
-		// if we do not have that many of the unit type, return false
-		if (BWAPI::Broodwar->self()->allUnitCount(bogi.metaType.unitType) < bogi.count)
-		{
-			return false;
+		int unitCount = BWAPI::Broodwar->self()->allUnitCount(bogi.metaType.unitType);
+
+		// we definitely have enough units
+		if (unitCount >= bogi.count) return true;
+
+		// if this is a building, a worker might already be on its way
+		if (bogi.metaType.isBuilding()) {
+			BOOST_FOREACH(const BWAPI::Unit *unit, BWAPI::Broodwar->self()->getUnits())
+			{
+				if (unit->getLastCommand().getUnitType() == bogi.metaType.unitType)
+				{
+					++unitCount;
+					if (unitCount >= bogi.count)
+					{
+						return true;
+					}
+				}
+			}
 		}
+		
+		// not enough
+		return false;
 	}
 	// if we have not researched that tech, return false
 	else if (bogi.metaType.type == MetaType::Tech)
