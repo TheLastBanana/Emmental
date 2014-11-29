@@ -102,6 +102,8 @@ void RangedManager::executeMicro(const UnitVector & targets)
 		}
 	}
 
+	UnitVector rangedCloakedUnitTargets;
+
 	// for each zealot
 	BOOST_FOREACH(BWAPI::Unit * rangedUnit, rangedUnits)
 	{
@@ -172,11 +174,6 @@ void RangedManager::executeMicro(const UnitVector & targets)
 void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targets, BWAPI::Unit * target)
 {
 	double range(rangedUnit->getType().groundWeapon().maxRange());
-	if (rangedUnit->getType() == BWAPI::UnitTypes::Protoss_Dragoon && BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Singularity_Charge))
-	{
-		range = 6 * 32;
-	}
-
 	// determine whether the target can be kited
 	if (range <= getEffectiveRange(rangedUnit, target))
 	{
@@ -189,6 +186,12 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 	bool		kite(true);
 	double		dist(rangedUnit->getDistance(target));
 	double		speed(rangedUnit->getType().topSpeed());
+
+	// If we're a vulture and have Ion Thrusters increase our speed
+	if (rangedUnit->getType() == BWAPI::UnitTypes::Terran_Vulture &&
+		BWAPI::Broodwar->self.getUpgradeLevel(BWAPI::UpgradeTypes::Ion_Thrusters) == 1) {
+			speed *= 1.5;
+	}
 
 	// don't kite damageless enemies
 	bool isFlyer = rangedUnit->getType().isFlyer();
@@ -215,6 +218,19 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 	{
 		BWAPI::Broodwar->drawCircleMap(rangedUnit->getPosition().x(), rangedUnit->getPosition().y(), 
 			(int)range, BWAPI::Colors::Cyan);
+	}
+
+	// If the unit isn't visible, we're a vulture, they aren't flying, we've researched mines
+	// and we have mines left, try and drop a mine
+	if (!target->isVisible() &&
+		rangedUnit->getType() == BWAPI::UnitTypes::Terran_Vulture &&
+		!target->getType().isFlyer() &&
+		BWAPI::Broodwar->self.hasResearched(BWAPI::TechTypes::Spider_Mines))
+	{
+		// Success if we have mines left
+		bool dropSuccess = rangedUnit->useTech(BWAPI::TechTypes::Spider_Mines);
+		kite = !dropSuccess; // If we're trying to drop a mine, don't kite
+		BWAPI::Broodwar->printf("We see some one that isn't visible, trying to drop a mine: %d", dropSuccess);
 	}
 
 	// if we can't shoot, run away
