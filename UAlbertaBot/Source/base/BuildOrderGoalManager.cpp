@@ -39,7 +39,9 @@ bool BuildOrderGoalManager::isCompleted(const BuildOrderGoalItem & bogi) const
 	// if we have not researched that tech, return false
 	else if (bogi.metaType.type == MetaType::Tech)
 	{
-		if (!BWAPI::Broodwar->self()->hasResearched(bogi.metaType.techType) && bogi.count > 0)
+		if (!BWAPI::Broodwar->self()->hasResearched(bogi.metaType.techType) &&
+			!BWAPI::Broodwar->self()->isResearching(bogi.metaType.techType) &&
+			bogi.count > 0)
 		{
 			return false;
 		}
