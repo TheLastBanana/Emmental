@@ -102,8 +102,6 @@ void RangedManager::executeMicro(const UnitVector & targets)
 		}
 	}
 
-	UnitVector rangedCloakedUnitTargets;
-
 	// for each zealot
 	BOOST_FOREACH(BWAPI::Unit * rangedUnit, rangedUnits)
 	{
@@ -189,7 +187,7 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 
 	// If we're a vulture and have Ion Thrusters increase our speed
 	if (rangedUnit->getType() == BWAPI::UnitTypes::Terran_Vulture &&
-		BWAPI::Broodwar->self.getUpgradeLevel(BWAPI::UpgradeTypes::Ion_Thrusters) == 1) {
+		BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Ion_Thrusters) == 1) {
 			speed *= 1.5;
 	}
 
@@ -225,7 +223,7 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 	if (!target->isVisible() &&
 		rangedUnit->getType() == BWAPI::UnitTypes::Terran_Vulture &&
 		!target->getType().isFlyer() &&
-		BWAPI::Broodwar->self.hasResearched(BWAPI::TechTypes::Spider_Mines))
+		BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Spider_Mines))
 	{
 		// Success if we have mines left
 		bool dropSuccess = rangedUnit->useTech(BWAPI::TechTypes::Spider_Mines);
