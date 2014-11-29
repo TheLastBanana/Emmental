@@ -38,15 +38,8 @@ void WorkerManager::updateWorkerStatus()
 	// for each of our Workers
 	BOOST_FOREACH (BWAPI::Unit * worker, workerData.getWorkers())
 	{
-		if (!worker->isCompleted())
+		if (!worker->isCompleted() || BunkerManager::Instance().getBunkerSlave() == worker)
 		{
-			continue;
-		}
-
-		// if worker is a bunker slave
-		if (BunkerManager::Instance().getBunkerSlave() == worker)
-		{
-			BunkerManager::Instance().updateBunkerSlave();
 			continue;
 		}
 
@@ -54,7 +47,7 @@ void WorkerManager::updateWorkerStatus()
 		if (worker->isIdle() && 
 			(workerData.getWorkerJob(worker) != WorkerData::Build) && 
 			(workerData.getWorkerJob(worker) != WorkerData::Move) &&
-			(workerData.getWorkerJob(worker) != WorkerData::Scout)) 
+			(workerData.getWorkerJob(worker) != WorkerData::Scout))
 		{
 			//printf("Worker %d set to idle", worker->getID());
 			// set its job to idle
@@ -74,7 +67,8 @@ void WorkerManager::updateWorkerStatus()
 		}
 
 		// if bunker needs a repair slave SCV, set it if its mineral worker or idle.
-		if (BunkerManager::Instance().allBunkers().size() > 0 && BunkerManager::Instance().bunkerRepairEmpty() && isFree(worker))
+		if ((!BunkerManager::Instance().replacedMaxSlaves()) && BunkerManager::Instance().allBunkers().size() > 0 &&
+			BunkerManager::Instance().bunkerRepairEmpty() && isFree(worker))
 		{
 			BWAPI::Unit* bunker = *BunkerManager::Instance().allBunkers().begin();
 			if (slave == 0)
@@ -83,7 +77,7 @@ void WorkerManager::updateWorkerStatus()
 				slave = worker;
 		}
 	}
-	if (BunkerManager::Instance().bunkerRepairEmpty() && slave != 0)
+	if (slave != 0 && (!BunkerManager::Instance().replacedMaxSlaves()) && BunkerManager::Instance().bunkerRepairEmpty())
 	{
 		workerData.setWorkerJob(slave, WorkerData::Default, NULL);
 		BunkerManager::Instance().setBunkerSlave(slave);

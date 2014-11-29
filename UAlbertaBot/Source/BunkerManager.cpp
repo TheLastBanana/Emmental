@@ -8,22 +8,70 @@ void BunkerManager::executeMicro(const UnitVector & targets)
 	//targets.noCheeseForThem();
 }
 
+void BunkerManager::patrolling(BWAPI::Unit* unit, BWAPI::Position target, int radius) const
+{
+	UnitVector enemyNear;
+	MapGrid::Instance().GetUnits(enemyNear, target, 400, false, true);
+
+	if (enemyNear.size() > 0)
+		unit->attack(enemyNear.front());
+	else
+		//unit->move(target);
+		unit->patrol(target + BWAPI::Position((rand() % radius) - (radius/2), (rand() % radius) - (radius/2)));
+}
+
 void BunkerManager::orderMarines() const
 {
 	// getting all units of this bunkerManager squad.
 	const UnitVector & bunkerFodder = getUnits();
+	
+	// patrol/assign at most 4 marines on each bunker.
+	int numAssigned = 0;
 
 	std::set<BWAPI::Unit*>::const_iterator begin = bunkersToFill.begin();
 	std::set<BWAPI::Unit*>::const_iterator end = bunkersToFill.end();
 	std::set<BWAPI::Unit*>::const_iterator it = begin;
-
-	BOOST_FOREACH(BWAPI::Unit* unit, bunkerFodder){
+	BOOST_FOREACH(BWAPI::Unit* unit, bunkerFodder)
+	{
+		if (bunkersAll.size() == 0 || bunkersToFill.size() == 0)
+		{
+			// if no bunker, protect starting position.
+			patrolling(unit, start, 700);
+			continue;
+		}
 		if (it == end)
 			it = begin;
-		// command unit to go into a bunker (right now at any distance).
-		unit->rightClick(*it);
-		it++;
+		if ((*it)->isCompleted())
+			// command unit to go into a bunker (right now at any distance).
+			unit->rightClick(*it);
+		else
+			// patrol around the bunker
+			patrolling(unit, BWAPI::Position((*it)->getPosition()), 200);
+		if (numAssigned >= 4)
+		{
+			++it;
+			numAssigned = 0;
+		}
+		++numAssigned;
 	}
+}
+
+void BunkerManager::updateBunkerSlave()
+{
+	// if no bunker slave exists or no bunkers exist
+	if (bunkerRepairEmpty() || bunkersAll.size() == 0)
+		return;
+
+	// tell slave to repair bunker if it is not 100% and not dead.
+	BOOST_FOREACH(BWAPI::Unit* bunkerToRepair, bunkersAll)
+	{
+		if (bunkerToRepair->isCompleted() && bunkerToRepair->getHitPoints() < 350 && !bunkerRepairSlave->isRepairing())
+			bunkerRepairSlave->repair(bunkerToRepair);
+	}
+	// tell slave to stay near bunker if it is not repairing.
+	BWAPI::Unit* bunker = *bunkersAll.begin();
+	if (!bunkerRepairSlave->isRepairing() && bunkerRepairSlave->getDistance(bunker) > 60)
+		bunkerRepairSlave->move(bunker->getPosition());
 }
 
 void BunkerManager::onUnitCreate(BWAPI::Unit* unit)
@@ -32,15 +80,14 @@ void BunkerManager::onUnitCreate(BWAPI::Unit* unit)
 		bunkersAll.insert(unit);
 }
 
-void BunkerManager::onUnitDestroyed(BWAPI::Unit* unit)
+void BunkerManager::onUnitDestroyed(BWAPI::Unit* bunkerIsKill)
 {
-	if (unit->getPlayer() == BWAPI::Broodwar->self() && unit->getType() == BWAPI::UnitTypes::Terran_Bunker)
+	if (bunkerIsKill->getPlayer() == BWAPI::Broodwar->self() && bunkerIsKill->getType() == BWAPI::UnitTypes::Terran_Bunker)
 	{
-		if (bunkerToRepairSet.find(unit) != bunkerToRepairSet.end())
-			bunkerToRepairSet.erase(unit);
-		if (bunkersToFill.find(unit) != bunkersToFill.end())
-			bunkersToFill.erase(unit);
-		bunkersAll.erase(unit);
+		if (bunkersToFill.find(bunkerIsKill) != bunkersToFill.end())
+			bunkersToFill.erase(bunkerIsKill);
+
+		bunkersAll.erase(bunkerIsKill);
 	}
 }
 
@@ -50,10 +97,10 @@ int BunkerManager::bunkerNeedsFilling() const
 
 	BOOST_FOREACH(BWAPI::Unit * bunker, bunkersToFill)
 	{
-		int numInside = bunker->getLoadedUnits().size();
-		// Check if there are empty spots. Bunker can hold maximum 4 marines.
-		if (numInside < 4)
-			numUnitsNeeded += 4 - numInside;
+			int numInside = bunker->getLoadedUnits().size();
+			// Check if there are empty spots. Bunker can hold maximum 4 marines.
+			if (numInside < 4)
+				numUnitsNeeded += 4 - numInside;
 	}
 	return numUnitsNeeded;
 }
@@ -61,10 +108,11 @@ int BunkerManager::bunkerNeedsFilling() const
 // this updates checks if each bunker needs some marines.
 void BunkerManager::update()
 {
+	//SparCraft::Timer t;
+	//t.start();
 	static int lastTime = 0;
 	int timeNow = BWAPI::Broodwar->elapsedTime();
-
-	//check every second only because this is expensive :(
+	// Check every second only because this is expensive/intensive
 	if (timeNow - lastTime >= 1)
 	{
 		// Check and update if bunkers need some marines.
@@ -76,25 +124,25 @@ void BunkerManager::update()
 				std::set<BWAPI::Unit*>::iterator inList = bunkersToFill.find(bunker);
 				if (inList != bunkersToFill.end())
 					bunkersToFill.erase(inList);
-			}
-			// check if any bunkers need marines and update the bunker to have a repair slave.
-			if (bunker->isCompleted() && bunker->getHitPoints() > 0 && bunker->exists())
+			} 
+			else
 			{
+				// check if any bunkers need marines and update the bunker to have a repair slave.
 				int numInside = bunker->getLoadedUnits().size();
 				// Check if there are empty spots. Bunker can hold maximum 4 marines.
 				if (numInside < 4)
 					bunkersToFill.insert(bunker);
-				// if bunker to have a repair slave is dead, replace it with a new bunker.
-				if (bunkerToRepairSet.find(bunker) == bunkerToRepairSet.end())
-					bunkerToRepairSet.insert(bunker);
 			}
 		}
-		// Order marines into the bunkers if there are bunkers to fill.
-		if (bunkersToFill.size() != 0)
+		// Order marines into the bunkers or patrol
+		if (getUnits().size() > 0)
 			orderMarines();
 
 		lastTime = BWAPI::Broodwar->elapsedTime();
 	}
+	// Call slave to repair if bunker needs some fixin'
+	updateBunkerSlave();
+	//BWAPI::Broodwar->printf("time in MS %4.10f",t.getElapsedTimeInMilliSec());
 }
 
 bool BunkerManager::allBunkersFull() const
@@ -109,25 +157,10 @@ const std::set<BWAPI::Unit*> &BunkerManager::allBunkers() const
 
 void BunkerManager::setBunkerSlave(BWAPI::Unit* slave)
 {
-	bunkerRepairSlave = slave;
-}
-
-void BunkerManager::updateBunkerSlave()
-{
-	// if no bunker slave exists or no bunkers exist
-	if (bunkerRepairEmpty() || bunkerToRepairSet.size() == 0 )
-		return;
-	
-	// tell slave to stay near bunker if it is not repairing.
-	BWAPI::Unit* bunker = *bunkerToRepairSet.begin();
-	if (!bunkerRepairSlave->isRepairing() && bunkerRepairSlave->getDistance(bunker) > 60)
-		bunkerRepairSlave->move(bunker->getPosition());
-
-	// tell slave to repair bunker if it is not 100%
-	BOOST_FOREACH(BWAPI::Unit* bunkerToRepair, bunkerToRepairSet)
+	if (replacedSlave < maxReplaceSlave && bunkerRepairSlave != slave)
 	{
-		if (bunkerToRepair->getHitPoints() < 350 && !bunkerRepairSlave->isRepairing())
-			bunkerRepairSlave->repair(bunkerToRepair);
+		bunkerRepairSlave = slave;
+		++replacedSlave;
 	}
 }
 
@@ -139,6 +172,11 @@ bool BunkerManager::bunkerRepairEmpty() const
 BWAPI::Unit* BunkerManager::getBunkerSlave() const
 {
 	return bunkerRepairSlave;
+}
+
+bool BunkerManager::replacedMaxSlaves() const
+{
+	return replacedSlave >= maxReplaceSlave;
 }
 
 BunkerManager & BunkerManager::Instance()

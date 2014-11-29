@@ -97,7 +97,7 @@ void BuildingManager::assignWorkersToUnassignedBuildings()
 		b.finalPosition = testLocation;
 
 		// grab a worker unit from WorkerManager which is closest to this final position
-		BWAPI::Unit * workerToAssign = WorkerManager::Instance().getBuilder(b);
+		BWAPI::Unit* workerToAssign = WorkerManager::Instance().getBuilder(b);
 
 		// if the worker exists
 		if (workerToAssign) {
@@ -365,10 +365,13 @@ void BuildingManager::checkForCompletedBuildings() {
 			// if we are terran, give the worker back to worker manager
 			if (BWAPI::Broodwar->self()->getRace() == BWAPI::Races::Terran)
 			{
-				WorkerManager::Instance().finishedWithWorker(b.builderUnit);
-				// if bunker was created, announce the associated pun. Printing locally, as announcing to enemy is bad idea...
+				// if bunker was created, announce the associated pun.
 				if (b.type.getID() == BWAPI::UnitTypes::Terran_Bunker)
-					BWAPI::Broodwar->printf("Bunker Hill Cheese company chain established!");
+				{
+					BWAPI::Broodwar->sendText("Bunker Hill Cheese company chain established!");
+				}
+				// return worker unit to worker manager
+				WorkerManager::Instance().finishedWithWorker(b.builderUnit);
 			}
 
 			// remove this unit from the under construction vector

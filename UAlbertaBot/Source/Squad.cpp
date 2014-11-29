@@ -130,8 +130,8 @@ void Squad::setManagerUnits()
 			{
 				transportUnits.push_back(unit);
 			}
-			// select marines if need to fill any bunkers
-			else if (!BunkerManager::Instance().allBunkersFull() && unit->getType() == BWAPI::UnitTypes::Terran_Marine)
+			// select marines to be defense and bunkers.
+			else if (unit->getType() == BWAPI::UnitTypes::Terran_Marine)
 			{
 				bunkerUnits.push_back(unit);
 			}
