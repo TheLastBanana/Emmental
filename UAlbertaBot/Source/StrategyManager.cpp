@@ -41,6 +41,8 @@ void StrategyManager::addStrategies()
 		"0 "	// SCV
 		"0 "	// SCV
 		"3 "	// Barracks
+		"16";
+	/*
 		"5 "	// Marine
 		"5 "	// Marine
 		"5 "	// Marine
@@ -56,7 +58,7 @@ void StrategyManager::addStrategies()
 		"0 "	// SCV
 		"0 "	// SCV
 		"9";	// Factory
-	
+	*/
 	terranOpeningBook[TerranMarineRush] =
 		"0 "	// SCV
 		"0 "	// SCV
@@ -690,31 +692,46 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	//if (BWAPI::Broodwar->self()->minerals() < 500) BWAPI::Broodwar->printf("<your-name> <your-student-id>");
 	//int numMarines =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Marine);
 	int numVultures =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Vulture);
-
-	//int marinesWanted = 5;
-	int factoriesWanted = (BWAPI::Broodwar->getFrameCount() < 10000) ? 1 : 3;
+	int numSCV =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_SCV);
+	int numCC =					BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Command_Center);
+	static int wantSpidermine = 1; //Used to stop duplicate spidermines
+	static int wantIonThrusters = 1; //just in case
+	int scvWanted = numSCV + 5 + 5*(numCC - 1);
+	if (scvWanted > (numCC) * 26) 
+	{
+		scvWanted = (numCC) * 26;
+	}
+	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_SCV, scvWanted, 10, false));
+	int marinesWanted = 4;
+	int factoriesWanted = (BWAPI::Broodwar->getFrameCount() < 10000) ? 1 : 4;
 	int vulturesWanted = numVultures + 5;
-	//goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Marine, marinesWanted));
+	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Marine, marinesWanted,10, true));
+	//build refinery
+	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Refinery, 1, 11, false));
 
 	// build factories
-	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Factory, factoriesWanted));
 
-	// build vultures
-	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 0)
-	{
-		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Vulture, vulturesWanted));
-	}
+	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Factory, factoriesWanted, 1, false));
+
+	// build vultures.
+	// I took out the requirement, though this might stall out our bot. In theory, since factories are a higher priority, 
+	//we should always be building them before the vultures.
+	//if (BWAPI::Broodwar->self()->UnitCount(BWAPI::UnitTypes::Terran_Factory) > 0)
+	//{
+	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Vulture, vulturesWanted, 0 , false));
+	//}
 	
 	// build bunkers
-	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Barracks) > 0) {
-		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Bunker, 1));
+	if ((BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Barracks) > 0) && (numSCV > 11)) {
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Bunker, 1, 6, false));
 	}
 	// train marines for bunkers
+	/*
 	if (!BunkerManager::Instance().allBunkersFull()) {
 		int bunkerMarinesNeeded = BunkerManager::Instance().bunkerNeedsFilling();
-		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Marine, bunkerMarinesNeeded));
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Marine, bunkerMarinesNeeded,10,false));
 	}
-
+	*/
 	// build machine shops
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 0 &&
 		BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Machine_Shop) == 0)
@@ -727,17 +744,19 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	{
 		if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Ion_Thrusters) == 0)
 		{
-			goal.push_back(BuildOrderGoalItem(BWAPI::UpgradeTypes::Ion_Thrusters, 1));
+			goal.push_back(BuildOrderGoalItem(BWAPI::UpgradeTypes::Ion_Thrusters, wantIonThrusters, 0, false));
+			wantIonThrusters = 0;
 		}
 
 		if (!BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Spider_Mines))
 		{
-			goal.push_back(BuildOrderGoalItem(BWAPI::TechTypes::Spider_Mines, 1));
+			goal.push_back(BuildOrderGoalItem(BWAPI::TechTypes::Spider_Mines, 1, 0, false));
+			wantSpidermine = 0;
 		}
 	}
 
 	//build starport
-	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 2)
+	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Vulture) >= 5)
 	{
 		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Starport, 2));
 	}
@@ -757,7 +776,14 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 			//goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Armory, 1));
 		//}
 	//}
+	//expand when secure
+	if ((BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Bunker) > 0) &&
+		(numVultures >= 5) &&
+		numCC == 1)
+	{
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Command_Center, numCC + 1, 10, true));
 
+	}
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Armory) > 0) {
 		if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Terran_Vehicle_Weapons) < 2)
 		{
