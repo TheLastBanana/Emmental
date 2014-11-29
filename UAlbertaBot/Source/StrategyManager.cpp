@@ -691,10 +691,10 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	//int numMarines =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Marine);
 	int numVultures =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Vulture);
 
-	int marinesWanted = 5;
+	//int marinesWanted = 5;
 	int factoriesWanted = (BWAPI::Broodwar->getFrameCount() < 10000) ? 1 : 3;
 	int vulturesWanted = numVultures + 5;
-	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Marine, marinesWanted));
+	//goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Marine, marinesWanted));
 
 	// build factories
 	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Factory, factoriesWanted));
@@ -707,17 +707,12 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	
 	// build bunkers
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Barracks) > 0) {
-		if (BunkerManager::Instance().allBunkers().size() < 2){
-			goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Bunker, 1));
-		}
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Bunker, 1));
 	}
 	// train marines for bunkers
 	if (!BunkerManager::Instance().allBunkersFull()) {
 		int bunkerMarinesNeeded = BunkerManager::Instance().bunkerNeedsFilling();
-		// loop because (from what I heard) if this exceeds the number of current available marine training slots
-		//  they will just build more Barracks to accomodate for extra training slots.
-		for (int i = 0; i < bunkerMarinesNeeded; i++)
-			goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Marine, 1));
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Marine, bunkerMarinesNeeded));
 	}
 
 	// build machine shops
