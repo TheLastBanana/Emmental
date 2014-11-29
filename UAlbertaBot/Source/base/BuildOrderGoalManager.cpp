@@ -8,8 +8,20 @@ BuildOrderGoalItem::BuildOrderGoalItem(const MetaType & metaType, int count, int
 
 	// set priorities
 	switch (metaType.type) {
+	case MetaType::Tech:
+		priority = 10000;
+		break;
+
+	case MetaType::Upgrade:
+		priority = 0;
+		break;
+
+	case MetaType::Unit:
+		priority = 0;
+		break;
+
 	default:
-		priority = -1;
+		priority = 0;
 		break;
 	}
 }
