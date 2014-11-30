@@ -2,7 +2,7 @@
 #include "StrategyManager.h"
 
 // constructor
-StrategyManager::StrategyManager() 
+StrategyManager::StrategyManager()
 	: firstAttackSent(false)
 	, currentStrategy(0)
 	, selfRace(BWAPI::Broodwar->self()->getRace())
@@ -13,23 +13,23 @@ StrategyManager::StrategyManager()
 }
 
 // get an instance of this
-StrategyManager & StrategyManager::Instance() 
+StrategyManager & StrategyManager::Instance()
 {
 	static StrategyManager instance;
 	return instance;
 }
 
-void StrategyManager::addStrategies() 
+void StrategyManager::addStrategies()
 {
 	protossOpeningBook = std::vector<std::string>(NumProtossStrategies);
-	terranOpeningBook  = std::vector<std::string>(NumTerranStrategies);
-	zergOpeningBook    = std::vector<std::string>(NumZergStrategies);
+	terranOpeningBook = std::vector<std::string>(NumTerranStrategies);
+	zergOpeningBook = std::vector<std::string>(NumZergStrategies);
 
 	//protossOpeningBook[ProtossZealotRush]	= "0 0 0 0 1 0 0 3 0 0 3 0 1 3 0 4 4 4 4 4 1 0 4 4 4";
-    protossOpeningBook[ProtossZealotRush]	= "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 1 4 3 0 1 0 4 0 4 4 4 4 1 0 4 4 4";
+	protossOpeningBook[ProtossZealotRush] = "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 1 4 3 0 1 0 4 0 4 4 4 4 1 0 4 4 4";
 	//protossOpeningBook[ProtossZealotRush]	= "0";
 	//protossOpeningBook[ProtossDarkTemplar]	= "0 0 0 0 1 3 0 7 5 0 0 12 3 13 0 22 22 22 22 0 1 0";
-    protossOpeningBook[ProtossDarkTemplar]	=     "0 0 0 0 1 0 3 0 7 0 5 0 12 0 13 3 22 22 1 22 22 0 1 0";
+	protossOpeningBook[ProtossDarkTemplar] = "0 0 0 0 1 0 3 0 7 0 5 0 12 0 13 3 22 22 1 22 22 0 1 0";
 	protossOpeningBook[ProtossDragoons] = "0 0 0 0 1 0 0 3 0 7 0 0 5 0 0 3 8 6 1 6 6 0 3 1 0 6 6 6";
 	terranOpeningBook[TerranVultureRush] =
 		"0 "	// SCV
@@ -41,23 +41,24 @@ void StrategyManager::addStrategies()
 		"0 "	// SCV
 		"0 "	// SCV
 		"3 "	// Barracks
-		"16";
+		"16 "
+		"0";
 	/*
-		"5 "	// Marine
-		"5 "	// Marine
-		"5 "	// Marine
-		"5 "	// Marine
-		"16 "	// Bunker
-		"0 "	// SCV
-		"0 "	// SCV
-		"4 "    // Refinery
-		"0 "	// SCV
-		"1 "	// Supply depot
-		"9 "	// Factory
-		"0 "	// SCV
-		"0 "	// SCV
-		"0 "	// SCV
-		"9";	// Factory
+	"5 "	// Marine
+	"5 "	// Marine
+	"5 "	// Marine
+	"5 "	// Marine
+	"16 "	// Bunker
+	"0 "	// SCV
+	"0 "	// SCV
+	"4 "    // Refinery
+	"0 "	// SCV
+	"1 "	// Supply depot
+	"9 "	// Factory
+	"0 "	// SCV
+	"0 "	// SCV
+	"0 "	// SCV
+	"9";	// Factory
 	*/
 	terranOpeningBook[TerranMarineRush] =
 		"0 "	// SCV
@@ -86,7 +87,7 @@ void StrategyManager::addStrategies()
 		"0 "	// SCV
 		"6";	// Academy
 
-	zergOpeningBook[ZergZerglingRush]		= "0 0 0 0 0 1 0 0 0 2 3 5 0 0 0 0 0 0 1 6";
+	zergOpeningBook[ZergZerglingRush] = "0 0 0 0 0 1 0 0 0 2 3 5 0 0 0 0 0 0 1 6";
 
 	if (selfRace == BWAPI::Races::Protoss)
 	{
@@ -158,7 +159,7 @@ void StrategyManager::readResults()
 	// if the file doesn't exist, set the results to zeros
 	if (stat(readFile.c_str(), &buf) == -1)
 	{
-		std::fill(results.begin(), results.end(), IntPair(0,0));
+		std::fill(results.begin(), results.end(), IntPair(0, 0));
 	}
 	// otherwise read in the results
 	else
@@ -180,7 +181,7 @@ void StrategyManager::readResults()
 		f_in.close();
 	}
 
-	BWAPI::Broodwar->printf("Results (%s): (%d %d) (%d %d) (%d %d)", BWAPI::Broodwar->enemy()->getName().c_str(), 
+	BWAPI::Broodwar->printf("Results (%s): (%d %d) (%d %d) (%d %d)", BWAPI::Broodwar->enemy()->getName().c_str(),
 		results[0].first, results[0].second, results[1].first, results[1].second, results[2].first, results[2].second);
 }
 
@@ -189,12 +190,12 @@ void StrategyManager::writeResults()
 	std::string writeFile = writeDir + BWAPI::Broodwar->enemy()->getName() + ".txt";
 	std::ofstream f_out(writeFile.c_str());
 
-	f_out << results[ProtossZealotRush].first   << "\n";
-	f_out << results[ProtossZealotRush].second  << "\n";
-	f_out << results[ProtossDarkTemplar].first  << "\n";
+	f_out << results[ProtossZealotRush].first << "\n";
+	f_out << results[ProtossZealotRush].second << "\n";
+	f_out << results[ProtossDarkTemplar].first << "\n";
 	f_out << results[ProtossDarkTemplar].second << "\n";
-	f_out << results[ProtossDragoons].first     << "\n";
-	f_out << results[ProtossDragoons].second    << "\n";
+	f_out << results[ProtossDragoons].first << "\n";
+	f_out << results[ProtossDragoons].second << "\n";
 
 	f_out.close();
 }
@@ -230,7 +231,7 @@ void StrategyManager::setStrategy()
 				bestStrategyIndex = strategyIndex;
 			}
 		}
-		
+
 		currentStrategy = usableStrategies[bestStrategyIndex];
 	}
 	else
@@ -239,16 +240,16 @@ void StrategyManager::setStrategy()
 		currentStrategy = usableStrategies[0];
 
 		/*
-        std::string enemyName(BWAPI::Broodwar->enemy()->getName());
-        
-        if (enemyName.compare("Skynet") == 0)
-        {
-            currentStrategy = ProtossDarkTemplar;
-        }
-        else
-        {
-            currentStrategy = ProtossZealotRush;
-        }
+		std::string enemyName(BWAPI::Broodwar->enemy()->getName());
+
+		if (enemyName.compare("Skynet") == 0)
+		{
+		currentStrategy = ProtossDarkTemplar;
+		}
+		else
+		{
+		currentStrategy = ProtossZealotRush;
+		}
 		*/
 	}
 
@@ -283,7 +284,7 @@ void StrategyManager::onEnd(const bool isWinner)
 				results[getCurrentStrategy()].second = results[getCurrentStrategy()].second + 1;
 			}
 		}
-		
+
 		writeResults();
 	}
 }
@@ -296,9 +297,9 @@ const double StrategyManager::getUCBValue(const size_t & strategy) const
 		totalTrials += results[usableStrategies[s]].first + results[usableStrategies[s]].second;
 	}
 
-	double C		= 0.7;
-	double wins		= results[strategy].first;
-	double trials	= results[strategy].first + results[strategy].second;
+	double C = 0.7;
+	double wins = results[strategy].first;
+	double trials = results[strategy].first + results[strategy].second;
 
 	double ucb = (wins / trials) + C * sqrt(std::log(totalTrials) / trials);
 
@@ -323,7 +324,7 @@ const std::string StrategyManager::getOpeningBook() const
 	else if (selfRace == BWAPI::Races::Zerg)
 	{
 		return zergOpeningBook[currentStrategy];
-	} 
+	}
 
 	// something wrong, return the protoss one
 	return protossOpeningBook[currentStrategy];
@@ -348,7 +349,7 @@ const int StrategyManager::defendWithWorkers()
 	int defenseRadius = 300;
 
 	// fill the set with the types of units we're concerned about
-	BOOST_FOREACH (BWAPI::Unit * unit, BWAPI::Broodwar->enemy()->getUnits())
+	BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->enemy()->getUnits())
 	{
 		// if it's a zergling or a worker we want to defend
 		if (unit->getType() == BWAPI::UnitTypes::Zerg_Zergling)
@@ -372,8 +373,8 @@ const bool StrategyManager::doAttack(const std::set<BWAPI::Unit *> & freeUnits)
 
 	int numUnitsNeededForAttack = 1;
 
-	bool doAttack  = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Dark_Templar) >= 1
-					|| ourForceSize >= numUnitsNeededForAttack;
+	bool doAttack = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Dark_Templar) >= 1
+		|| ourForceSize >= numUnitsNeededForAttack;
 
 	if (doAttack)
 	{
@@ -391,9 +392,9 @@ const bool StrategyManager::expandProtossZealotRush() const
 		return false;
 	}
 
-	int numNexus =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
-	int numZealots =			BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Zealot);
-	int frame =					BWAPI::Broodwar->getFrameCount();
+	int numNexus = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
+	int numZealots = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Zealot);
+	int frame = BWAPI::Broodwar->getFrameCount();
 
 	// if there are more than 10 idle workers, expand
 	if (WorkerManager::Instance().getNumIdleWorkers() > 10)
@@ -441,29 +442,29 @@ const BOGIVector StrategyManager::getBuildOrderGoal()
 	/*
 	if (BWAPI::Broodwar->self()->getRace() == BWAPI::Races::Protoss)
 	{
-		if (getCurrentStrategy() == ProtossZealotRush)
-		{
-			return getProtossZealotRushBuildOrderGoal();
-		}
-		else if (getCurrentStrategy() == ProtossDarkTemplar)
-		{
-			return getProtossDarkTemplarBuildOrderGoal();
-		}
-		else if (getCurrentStrategy() == ProtossDragoons)
-		{
-			return getProtossDragoonsBuildOrderGoal();
-		}
+	if (getCurrentStrategy() == ProtossZealotRush)
+	{
+	return getProtossZealotRushBuildOrderGoal();
+	}
+	else if (getCurrentStrategy() == ProtossDarkTemplar)
+	{
+	return getProtossDarkTemplarBuildOrderGoal();
+	}
+	else if (getCurrentStrategy() == ProtossDragoons)
+	{
+	return getProtossDragoonsBuildOrderGoal();
+	}
 
-		// if something goes wrong, use zealot goal
-		return getProtossZealotRushBuildOrderGoal();
+	// if something goes wrong, use zealot goal
+	return getProtossZealotRushBuildOrderGoal();
 	}
 	else if (BWAPI::Broodwar->self()->getRace() == BWAPI::Races::Terran)
 	{
-		return getTerranBuildOrderGoal();
+	return getTerranBuildOrderGoal();
 	}
 	else
 	{
-		return getZergBuildOrderGoal();
+	return getZergBuildOrderGoal();
 	}
 	*/
 
@@ -472,15 +473,15 @@ const BOGIVector StrategyManager::getBuildOrderGoal()
 
 const MetaPairVector StrategyManager::getProtossDragoonsBuildOrderGoal() const
 {
-		// the goal to return
+	// the goal to return
 	MetaPairVector goal;
 
-	int numDragoons =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Dragoon);
-	int numProbes =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Probe);
-	int numNexusCompleted =		BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
-	int numNexusAll =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
-	int numCyber =				BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Cybernetics_Core);
-	int numCannon =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon);
+	int numDragoons = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Dragoon);
+	int numProbes = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Probe);
+	int numNexusCompleted = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
+	int numNexusAll = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
+	int numCyber = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Cybernetics_Core);
+	int numCannon = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon);
 
 	int dragoonsWanted = numDragoons > 0 ? numDragoons + 6 : 2;
 	int gatewayWanted = 3;
@@ -489,7 +490,7 @@ const MetaPairVector StrategyManager::getProtossDragoonsBuildOrderGoal() const
 	if (InformationManager::Instance().enemyHasCloakedUnits())
 	{
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Robotics_Facility, 1));
-	
+
 		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Robotics_Facility) > 0)
 		{
 			goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Observatory, 1));
@@ -534,9 +535,9 @@ const MetaPairVector StrategyManager::getProtossDragoonsBuildOrderGoal() const
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Nexus, numNexusAll + 1));
 	}
 
-	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Dragoon,	dragoonsWanted));
-	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Gateway,	gatewayWanted));
-	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Probe,	std::min(90, probesWanted)));
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Dragoon, dragoonsWanted));
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Gateway, gatewayWanted));
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Probe, std::min(90, probesWanted)));
 
 	return goal;
 }
@@ -546,13 +547,13 @@ const MetaPairVector StrategyManager::getProtossDarkTemplarBuildOrderGoal() cons
 	// the goal to return
 	MetaPairVector goal;
 
-	int numDarkTeplar =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Dark_Templar);
-	int numDragoons =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Dragoon);
-	int numProbes =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Probe);
-	int numNexusCompleted =		BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
-	int numNexusAll =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
-	int numCyber =				BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Cybernetics_Core);
-	int numCannon =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon);
+	int numDarkTeplar = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Dark_Templar);
+	int numDragoons = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Dragoon);
+	int numProbes = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Probe);
+	int numNexusCompleted = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
+	int numNexusAll = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
+	int numCyber = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Cybernetics_Core);
+	int numCannon = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon);
 
 	int darkTemplarWanted = 0;
 	int dragoonsWanted = numDragoons + 6;
@@ -561,9 +562,9 @@ const MetaPairVector StrategyManager::getProtossDarkTemplarBuildOrderGoal() cons
 
 	if (InformationManager::Instance().enemyHasCloakedUnits())
 	{
-		
+
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Robotics_Facility, 1));
-		
+
 		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Robotics_Facility) > 0)
 		{
 			goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Observatory, 1));
@@ -602,11 +603,11 @@ const MetaPairVector StrategyManager::getProtossDarkTemplarBuildOrderGoal() cons
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Nexus, numNexusAll + 1));
 	}
 
-	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Dragoon,	dragoonsWanted));
-	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Gateway,	gatewayWanted));
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Dragoon, dragoonsWanted));
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Gateway, gatewayWanted));
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Dark_Templar, darkTemplarWanted));
-	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Probe,	std::min(90, probesWanted)));
-	
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Probe, std::min(90, probesWanted)));
+
 	return goal;
 }
 
@@ -615,13 +616,13 @@ const MetaPairVector StrategyManager::getProtossZealotRushBuildOrderGoal() const
 	// the goal to return
 	MetaPairVector goal;
 
-	int numZealots =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Zealot);
-	int numDragoons =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Dragoon);
-	int numProbes =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Probe);
-	int numNexusCompleted =		BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
-	int numNexusAll =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
-	int numCyber =				BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Cybernetics_Core);
-	int numCannon =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon);
+	int numZealots = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Zealot);
+	int numDragoons = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Dragoon);
+	int numProbes = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Probe);
+	int numNexusCompleted = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
+	int numNexusAll = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
+	int numCyber = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Cybernetics_Core);
+	int numCannon = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon);
 
 	int zealotsWanted = numZealots + 8;
 	int dragoonsWanted = numDragoons;
@@ -631,7 +632,7 @@ const MetaPairVector StrategyManager::getProtossZealotRushBuildOrderGoal() const
 	if (InformationManager::Instance().enemyHasCloakedUnits())
 	{
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Robotics_Facility, 1));
-		
+
 		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Robotics_Facility) > 0)
 		{
 			goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Observatory, 1));
@@ -672,10 +673,10 @@ const MetaPairVector StrategyManager::getProtossZealotRushBuildOrderGoal() const
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Nexus, numNexusAll + 1));
 	}
 
-	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Dragoon,	dragoonsWanted));
-	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Zealot,	zealotsWanted));
-	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Gateway,	gatewayWanted));
-	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Probe,	std::min(90, probesWanted)));
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Dragoon, dragoonsWanted));
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Zealot, zealotsWanted));
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Gateway, gatewayWanted));
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Probe, std::min(90, probesWanted)));
 
 	return goal;
 }
@@ -691,36 +692,39 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	BOGIVector goal;
 
 	// Build command center
-	int numCC =	BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Command_Center);
-
+	int numCC = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Command_Center);
+	int numFac = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Factory);
+	int numStar = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Starport);
 	static int wantSpidermine = 1; //Used to stop duplicate spidermines
 	static int wantIonThrusters = 1; //just in case
-
 	// Build SCV
 	int numSCV = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_SCV);
-	int scvWanted = numSCV + 5 + 5*(numCC - 1);
-	if (scvWanted > (numCC) * 26) 
+	int scvWanted = numSCV + 4 * (numCC);
+	if (scvWanted > (numCC)* 26)
 	{
-		scvWanted = (numCC) * 26;
+		scvWanted = (numCC)* 26;
 	}
 	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_SCV, scvWanted, 10, false));
 
 	// Build Marines
 	//int numMarines =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Marine);
-	int marinesWanted = 4;
-	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Marine, marinesWanted, 10, true));
+	int marinesWanted = 6;
+	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Marine, marinesWanted, 10, false));
 
 	// Build factories
-	int factoriesWanted = (BWAPI::Broodwar->getFrameCount() < 10000) ? 1 : 4;
-	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Factory, factoriesWanted, 1, false));
+	//int factoriesWanted = (BWAPI::Broodwar->getFrameCount() < 10000) ? 1 : 4;
 
+	int factoriesWanted = 1;
 	// Build vultures
 	// I took out the requirement, though this might stall out our bot. In theory, since factories are a higher priority, 
 	//we should always be building them before the vultures.
 	int numVultures = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Vulture);
-	int vulturesWanted = numVultures + 5;
+	int vulturesWanted = numVultures + numFac;
+	if (numVultures > 2) factoriesWanted = 2;
+	if (numVultures > 6) factoriesWanted = 3;
+	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Factory, factoriesWanted, 1, false));
 	//if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Factory) > 0) {
-	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Vulture, vulturesWanted, 0, false));
+	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Vulture, vulturesWanted, 2, false));
 	//}
 
 	//build refinery
@@ -734,8 +738,8 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	// train marines for bunkers
 	/*
 	if (!BunkerManager::Instance().allBunkersFull()) {
-		int bunkerMarinesNeeded = BunkerManager::Instance().bunkerNeedsFilling();
-		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Marine, bunkerMarinesNeeded,10,false));
+	int bunkerMarinesNeeded = BunkerManager::Instance().bunkerNeedsFilling();
+	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Marine, bunkerMarinesNeeded,10,false));
 	}
 	*/
 
@@ -743,7 +747,7 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 0 &&
 		BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Machine_Shop) == 0)
 	{
-		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Machine_Shop, 1, 3, false));
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Machine_Shop, 1, 1, false));
 	}
 
 	// Make sure we have a machine shop
@@ -751,20 +755,27 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 		// Research ion thrusters
 		if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Ion_Thrusters) == 0 &&
 			!BWAPI::Broodwar->self()->isUpgrading(BWAPI::UpgradeTypes::Ion_Thrusters))
-				goal.push_back(BuildOrderGoalItem(BWAPI::UpgradeTypes::Ion_Thrusters, 1, 0, false));
-
+		{
+			goal.push_back(BuildOrderGoalItem(BWAPI::UpgradeTypes::Ion_Thrusters, wantIonThrusters, 0, false));
+			wantIonThrusters = 0;
+		}
 		// Research spider mines
 		if (!BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Spider_Mines) &&
-			!BWAPI::Broodwar->self()->isResearching(BWAPI::TechTypes::Spider_Mines))
-				goal.push_back(BuildOrderGoalItem(BWAPI::TechTypes::Spider_Mines, 1, 0, false));
+			!BWAPI::Broodwar->self()->isResearching(BWAPI::TechTypes::Spider_Mines) &&
+			BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Ion_Thrusters) == 1)
+		{
+			goal.push_back(BuildOrderGoalItem(BWAPI::TechTypes::Spider_Mines, wantSpidermine, 0, false));
+			wantSpidermine = 0;
+		}
 	}
 
 	//build starport
-	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Vulture) >= 5)
+	if ((numVultures >= 5) &&
+		(numFac > 1))
 	{
 		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Starport, 2, 0, false));
 	}
-	
+
 	// build wraith
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Starport) > 0)
 	{
@@ -776,21 +787,35 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 		(numVultures >= 5) &&
 		numCC == 1)
 	{
-		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Command_Center, numCC + 1, 10, true));
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Command_Center, numCC + 1, 10, false));
 	}
 
 	//If we have a ton of extra money we should try to spend it.
 	//This isn't working.
 	// Build armory (upgrades)
 	/*if (BWAPI::Broodwar->self()->minerals() > 800) {
-		// Question: remove?
-		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 2)
-			goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Factory, 1));
+	// Question: remove?
+	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 2)
+	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Factory, 1));
 
-		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Armory) < 1)
-			goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Armory, 1));
+	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Armory) < 1)
+	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Armory, 1));
 	}*/
-	
+
+	//Comsat addon.
+	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 1)
+	{
+		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Academy) < 1)
+		{
+			goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Academy, 1, 11, false));
+		}
+		else
+		{
+			goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Comsat_Station, 1, 11, false));
+		}
+	}
+
+
 	// Build upgrades
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Armory) > 0) {
 		if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Terran_Vehicle_Weapons) < 2)
@@ -807,9 +832,9 @@ const MetaPairVector StrategyManager::getZergBuildOrderGoal() const
 {
 	// the goal to return
 	std::vector< std::pair<MetaType, UnitCountType> > goal;
-	
-	int numMutas  =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Zerg_Mutalisk);
-	int numHydras  =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Zerg_Hydralisk);
+
+	int numMutas = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Zerg_Mutalisk);
+	int numHydras = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Zerg_Hydralisk);
 
 	int mutasWanted = numMutas + 6;
 	int hydrasWanted = numHydras + 6;
@@ -822,7 +847,7 @@ const MetaPairVector StrategyManager::getZergBuildOrderGoal() const
 	return (const std::vector< std::pair<MetaType, UnitCountType> >)goal;
 }
 
- const int StrategyManager::getCurrentStrategy()
- {
-	 return currentStrategy;
- }
+const int StrategyManager::getCurrentStrategy()
+{
+	return currentStrategy;
+}
