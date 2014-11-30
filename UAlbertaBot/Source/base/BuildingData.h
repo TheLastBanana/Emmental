@@ -65,4 +65,5 @@ public:
 	int							getNumBuildings(BuildingState bs);
 
 	bool						isBeingBuilt(BWAPI::UnitType type);
+	int							buildingCount(BWAPI::UnitType type);
 };

@@ -73,3 +73,22 @@ bool ConstructionData::isBeingBuilt(BWAPI::UnitType type)
 
 	return false;
 }
+
+int ConstructionData::buildingCount(BWAPI::UnitType type)
+{
+	int count = 0;
+
+	// for each building vector
+	BOOST_FOREACH(std::vector<Building> & buildingVector, buildings)
+	{
+		BOOST_FOREACH(Building & b, buildingVector)
+		{
+			if (b.type == type)
+			{
+				++count;
+			}
+		}
+	}
+
+	return count;
+}

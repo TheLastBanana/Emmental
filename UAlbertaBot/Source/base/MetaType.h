@@ -25,6 +25,37 @@ struct MetaType {
 	bool isBuilding() const	{ return type == Unit && unitType.isBuilding(); }
 	bool isRefinery() const	{ return isBuilding() && unitType.isRefinery(); }
 
+	bool operator==(const MetaType & other) const
+	{
+		if (type != other.type) return false;
+
+		switch (type)
+		{
+		case Unit:
+			return unitType == other.unitType;
+			break;
+
+		case Tech:
+			return techType == other.techType;
+			break;
+
+		case Upgrade:
+			return upgradeType == other.upgradeType;
+			break;
+
+		case Command:
+			return commandType == other.commandType;
+			break;
+
+		case Default:
+			return true;
+			break;
+
+		default:
+			return false;
+		}
+	}
+
 	int supplyRequired()
 	{
 		if (isUnit())

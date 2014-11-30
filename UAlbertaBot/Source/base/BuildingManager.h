@@ -60,6 +60,7 @@ public:
 	void						printBuildingNumbers();
 
 	bool						isBeingBuilt(BWAPI::UnitType type);
+	int							buildingCount(BWAPI::UnitType type);
 	
 	void						drawBuildingInformation(int x, int y);
 };

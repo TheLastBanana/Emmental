@@ -48,6 +48,13 @@ bool BuildingManager::isBeingBuilt(BWAPI::UnitType type)
 	return buildingData.isBeingBuilt(type);
 }
 
+// checks all relevant data structures to see how many of the given type is being built
+int BuildingManager::buildingCount(BWAPI::UnitType type)
+{
+	// check unassigned buildings
+	return buildingData.buildingCount(type);
+}
+
 // STEP 1: DO BOOK KEEPING ON WORKERS WHICH MAY HAVE DIED
 void BuildingManager::validateWorkersAndBuildings() 
 {

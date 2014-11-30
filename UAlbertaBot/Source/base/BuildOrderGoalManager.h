@@ -2,8 +2,10 @@
 
 #include "Common.h"
 #include "MetaType.h"
+#include <map>
 
-typedef std::vector<std::pair<MetaType, bool> > BuildOrder;
+typedef std::pair<MetaType, bool> ToBuild;
+typedef std::vector<ToBuild> BuildOrder;
 
 struct BuildOrderGoalItem
 {
@@ -47,7 +49,7 @@ class BuildOrderGoalManager {
 	std::vector<BuildOrderGoal>	goals;
 
 	// checks to see if a goal item is completed by using BWAPI data
-	bool isCompleted(const BuildOrderGoalItem & bogi) const;
+	bool isCompleted(const BuildOrderGoalItem & bogi, const BuildOrder & buildOrder);
 
 public:
 

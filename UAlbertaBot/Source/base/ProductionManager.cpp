@@ -113,6 +113,16 @@ void ProductionManager::update()
 		queue.queueAsHighestPriority(MetaType(BWAPI::Broodwar->self()->getRace().getSupplyProvider()), true);
 	}
 
+	// detect producer deadlock once per second
+	BWAPI::UnitType producer = queue.getHighestPriorityItem().metaType.whatBuilds();
+	if (producer != BWAPI::UnitTypes::None &&
+		(BWAPI::Broodwar->getFrameCount() % 24 == 0) &&
+		BWAPI::Broodwar->self()->allUnitCount(producer) == 0)
+	{
+		BWAPI::Broodwar->printf("Producer deadlock detected, new search!");
+		performBuildOrderSearch(StrategyManager::Instance().getBuildOrderGoal());
+	}
+
 	// if they have cloaked units get a new goal asap
 	// TODO: implement for Terran
 	/*
@@ -152,7 +162,7 @@ void ProductionManager::onUnitDestroy(BWAPI::Unit * unit)
 		// if it's a worker or a building, we need to re-search for the current goal
 		if ((unit->getType().isWorker() && !WorkerManager::Instance().isWorkerScout(unit)) || unit->getType().isBuilding())
 		{
-			BWAPI::Broodwar->printf("Critical unit died, re-searching build order");
+			BWAPI::Broodwar->printf("%d Critical unit died, re-searching build order", BWAPI::Broodwar->getFrameCount());
 
 			if (unit->getType() != BWAPI::UnitTypes::Zerg_Drone)
 			{

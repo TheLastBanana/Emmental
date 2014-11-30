@@ -1,5 +1,6 @@
 #include "Common.h"
 #include "BuildOrderGoalManager.h"
+#include "BuildingManager.h"
 
 BuildOrderGoalItem::BuildOrderGoalItem(const MetaType & metaType, int count, int priority, bool blocking)
 	: metaType(metaType), count(count), priority(priority), blocking(blocking)
@@ -26,29 +27,31 @@ BuildOrderGoalItem::BuildOrderGoalItem(const MetaType & metaType, int count, int
 	}
 }
 
-bool BuildOrderGoalManager::isCompleted(const BuildOrderGoalItem & bogi) const
+bool BuildOrderGoalManager::isCompleted(const BuildOrderGoalItem & bogi, const BuildOrder & buildOrder)
 {
+	int count = 0;
+	BOOST_FOREACH(const ToBuild & toBuild, buildOrder)
+	{
+		if (toBuild.first == bogi.metaType)
+		{
+			++count;
+		}
+	}
+
 	if (bogi.metaType.type == MetaType::Unit)
 	{
-		int unitCount = BWAPI::Broodwar->self()->allUnitCount(bogi.metaType.unitType);
+		count += BWAPI::Broodwar->self()->allUnitCount(bogi.metaType.unitType);
 
 		// we definitely have enough units
-		if (unitCount >= bogi.count) return true;
+		if (count >= bogi.count) return true;
 
-		// if this is a building, a worker might already be on its way
-		if (bogi.metaType.isBuilding()) {
-			BOOST_FOREACH(const BWAPI::Unit *unit, BWAPI::Broodwar->self()->getUnits())
-			{
-				if (unit->getLastCommand().getUnitType() == bogi.metaType.unitType)
-				{
-					++unitCount;
-					if (unitCount >= bogi.count)
-					{
-						return true;
-					}
-				}
-			}
+		// check buildings under construction
+		if (bogi.metaType.unitType.isBuilding())
+		{
+			count += BuildingManager::Instance().buildingCount(bogi.metaType.unitType);
 		}
+
+		if (count >= bogi.count) return true;
 		
 		// not enough
 		return false;
@@ -58,6 +61,7 @@ bool BuildOrderGoalManager::isCompleted(const BuildOrderGoalItem & bogi) const
 	{
 		if (!BWAPI::Broodwar->self()->hasResearched(bogi.metaType.techType) &&
 			!BWAPI::Broodwar->self()->isResearching(bogi.metaType.techType) &&
+			count == 0 &&
 			bogi.count > 0)
 		{
 			return false;
@@ -66,7 +70,7 @@ bool BuildOrderGoalManager::isCompleted(const BuildOrderGoalItem & bogi) const
 	// if we have not upgraded to that level, return false
 	else if (bogi.metaType.type == MetaType::Upgrade)
 	{
-		if (BWAPI::Broodwar->self()->getUpgradeLevel(bogi.metaType.upgradeType) < bogi.count)
+		if (count + BWAPI::Broodwar->self()->getUpgradeLevel(bogi.metaType.upgradeType) < bogi.count)
 		{
 			return false;
 		}
@@ -77,9 +81,10 @@ bool BuildOrderGoalManager::isCompleted(const BuildOrderGoalItem & bogi) const
 
 BuildOrderGoalManager::BuildOrderGoalManager(const BOGIVector & items)
 {
-	BOOST_FOREACH(const BuildOrderGoalItem & item, items) {
+	BOOST_FOREACH(const BuildOrderGoalItem & item, items)
+	{
 		// don't bother queueing if it's done
-		if (isCompleted(item))
+		if (isCompleted(item, BuildOrder()))
 		{
 			continue;
 		}
@@ -113,9 +118,16 @@ BuildOrderGoalManager::BuildOrderGoalManager(const BOGIVector & items)
 	std::sort(goals.rbegin(), goals.rend());
 }
 
-void BuildOrderGoalManager::getBuildOrder(std::vector<std::pair<MetaType, bool> > & buildOrder)
+void BuildOrderGoalManager::getBuildOrder(BuildOrder & buildOrder)
 {
-	int supplyRemaining = BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed();
+	// Determine supply provider
+	BWAPI::UnitType supplyType = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
+	int supplyProvided = supplyType.supplyProvided();
+
+	// Determine future supply
+	int supplyRemaining = BWAPI::Broodwar->self()->completedUnitCount(supplyType);
+	supplyRemaining += BuildingManager::Instance().buildingCount(supplyType);
+	supplyRemaining = supplyRemaining * supplyProvided - BWAPI::Broodwar->self()->supplyUsed();
 
 	BOOST_FOREACH(BuildOrderGoal & bog, goals)
 	{
@@ -128,23 +140,18 @@ void BuildOrderGoalManager::getBuildOrder(std::vector<std::pair<MetaType, bool> 
 			BOOST_FOREACH(BuildOrderGoalItem & bogi, bog.items)
 			{
 				// this item hasn't been completed, so add one to the build order
-				if (!isCompleted(bogi))
+				if (!isCompleted(bogi, buildOrder))
 				{
 					buildOrder.push_back(std::pair<MetaType, bool>(bogi.metaType, bogi.blocking));
-
-					// subtract one so that it's considered as a built unit
-					--bogi.count;
 
 					// decrease projected supply amount
 					supplyRemaining -= bogi.metaType.supplyRequired();
 
 					// build more supply providers
-					if (supplyRemaining < 10)
+					if (supplyRemaining < supplyProvided)
 					{
-						BWAPI::UnitType type = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
-
-						buildOrder.push_back(std::pair<MetaType, bool>(type, false));
-						supplyRemaining += type.supplyProvided();
+						buildOrder.push_back(std::pair<MetaType, bool>(supplyType, false));
+						supplyRemaining += supplyProvided;
 					}
 
 					complete = false;
