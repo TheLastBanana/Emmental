@@ -39,8 +39,7 @@ class BunkerManager : public MicroManager
 
 public:
 	
-	BunkerManager() {
-		bunkerRepairSlave = 0; maxReplaceSlave = 6; replacedSlave = 0; start = BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation()); }
+	BunkerManager();
 	~BunkerManager() {}
 
 	// if a bunker is made add it to bunkerlist
