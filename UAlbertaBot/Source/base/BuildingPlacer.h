@@ -44,5 +44,9 @@ class BuildingPlacer
 	void					computeResourceBox();
 	
 	BWAPI::TilePosition		getRefineryPosition();
+
+	// Increments from the target towards the closeTo, bit by bit (tilePosition size) and check if can build there.
+	// returns BWAPI::TilePositions::None if cannot find any space to build.
+	BWAPI::TilePosition getPointClosestTo(BWAPI::TilePosition target, BWAPI::TilePosition closeTo, const Building & b, int bDist) const;
 	
 };

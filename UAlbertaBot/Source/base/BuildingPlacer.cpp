@@ -215,7 +215,7 @@ BWAPI::TilePosition BuildingPlacer::getBuildLocationNear(const Building & b, int
 		{
             iter++;
 
-            if (iter % 50 == 0)
+            if (iter % 4 == 0)
             {
                 if (t.getElapsedTimeInMilliSec() > 30)
                 {
@@ -460,6 +460,32 @@ bool BuildingPlacer::isReserved(int x, int y) const
 	}
 
 	return reserveMap[x][y];
+}
+
+BWAPI::TilePosition BuildingPlacer::getPointClosestTo(BWAPI::TilePosition target, BWAPI::TilePosition closeTo, const Building & b, int bDist) const
+{
+	BWAPI::TilePosition buildPos;
+
+	double tarY = target.y() - closeTo.y();
+	double tarX = target.x() - closeTo.x();
+	
+	// because atan2(0,0) kills.
+	if (tarY == 0 && tarX == 0)
+		tarY = tarX = 0.1;
+
+	double atanVal = atan2(tarY, tarX);
+	double xIncrease = cos(atanVal);
+	double yIncrease = sin(atanVal);
+
+	int getDist = static_cast<int>(target.getDistance(closeTo));
+	for (int i = 1; i < getDist; ++i)
+	{
+		buildPos = target + BWAPI::TilePosition(static_cast<int>(-xIncrease*i), static_cast<int>(-yIncrease*i));
+		if (this->canBuildHereWithSpace(buildPos, b, bDist, false))
+			return buildPos;
+	}
+
+	return BWAPI::TilePositions::None;
 }
 
 BuildingPlacer & BuildingPlacer::Instance() {

@@ -184,8 +184,8 @@ BWAPI::TilePosition BuildingManager::getBuildingLocation(const Building & b)
 			if (b.type == BWAPI::UnitTypes::Terran_Missile_Turret)
 				distance = 0;
 			else if (b.type == BWAPI::UnitTypes::Terran_Bunker)
-				// to let vultures through
-				distance = 2;
+				// to let marines through
+				distance = 1;
 
 			// whether or not we want the distance to be horizontal only
             bool horizontalOnly = b.type == BWAPI::UnitTypes::Protoss_Citadel_of_Adun ? true : false;
@@ -198,16 +198,18 @@ BWAPI::TilePosition BuildingManager::getBuildingLocation(const Building & b)
 				if (BunkerManager::Instance().allBunkers().size() > 0){
 					// place next bunker near other bunker
 					BWAPI::Unit* bunker = *BunkerManager::Instance().allBunkers().begin();
-					position = BWAPI::TilePosition(bunker->getPosition());
+					position = BuildingPlacer::Instance().getBuildLocationNear(b, distance, false, false, BWAPI::TilePosition(bunker->getPosition()));
 				}
 				else
 				{
 					// finding nearest chokepoint to base
-					position = MapTools::Instance().getClosestChokepoint(BWAPI::Broodwar->self()->getStartLocation());
+					BWAPI::TilePosition choke = MapTools::Instance().getClosestChokepoint(BWAPI::Broodwar->self()->getStartLocation());
+					
+					// build @ area near chokepoint that is closest to base, no more building on the wrong side of the choke point!
+					position = BuildingPlacer::Instance().getPointClosestTo(choke, BWAPI::Broodwar->self()->getStartLocation(), b, distance);
 				}
 
-				BWAPI::TilePosition bunkerLocation = BuildingPlacer::Instance().getBuildLocationNear(b, distance, false, false, position);
-				testLocation = bunkerLocation;
+				testLocation = position;
 			}
 			else
 			{

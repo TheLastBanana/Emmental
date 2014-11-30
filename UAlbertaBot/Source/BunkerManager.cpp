@@ -97,10 +97,10 @@ int BunkerManager::bunkerNeedsFilling() const
 
 	BOOST_FOREACH(BWAPI::Unit * bunker, bunkersToFill)
 	{
-			int numInside = bunker->getLoadedUnits().size();
-			// Check if there are empty spots. Bunker can hold maximum 4 marines.
-			if (numInside < 4)
-				numUnitsNeeded += 4 - numInside;
+		int numInside = bunker->getLoadedUnits().size();
+		// Check if there are empty spots. Bunker can hold maximum 4 marines.
+		if (numInside < 4)
+			numUnitsNeeded += 4 - numInside;
 	}
 	return numUnitsNeeded;
 }
@@ -157,7 +157,7 @@ const std::set<BWAPI::Unit*> &BunkerManager::allBunkers() const
 
 void BunkerManager::setBunkerSlave(BWAPI::Unit* slave)
 {
-	if (replacedSlave < maxReplaceSlave && bunkerRepairSlave != slave)
+	if (replacedSlave < maxReplaceSlave)
 	{
 		bunkerRepairSlave = slave;
 		++replacedSlave;
