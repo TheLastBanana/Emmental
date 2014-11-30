@@ -45,6 +45,7 @@ public:
 
 	void				update();
 	void				GetUnits(UnitVector & units, BWAPI::Position center, int radius, bool ourUnits, bool oppUnits);
+	void				GetUnitsWithInvisible(UnitVector & units, BWAPI::Position center, int radius, bool ourUnits, bool oppUnits);
 	BWAPI::Position		getLeastExplored();
 	BWAPI::Position		getNaturalExpansion();
 

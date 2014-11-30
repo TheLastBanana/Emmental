@@ -219,6 +219,53 @@ void MapGrid::GetUnits(UnitVector & units, BWAPI::Position center, int radius, b
 	}
 }
 
+void MapGrid::GetUnitsWithInvisible(UnitVector & units, BWAPI::Position center, int radius, bool ourUnits, bool oppUnits)
+{
+	const int x0(std::max((center.x() - radius) / cellSize, 0));
+	const int x1(std::min((center.x() + radius) / cellSize, cols - 1));
+	const int y0(std::max((center.y() - radius) / cellSize, 0));
+	const int y1(std::min((center.y() + radius) / cellSize, rows - 1));
+	const int radiusSq(radius * radius);
+	for (int y(y0); y <= y1; ++y)
+	{
+		for (int x(x0); x <= x1; ++x)
+		{
+			int row = y;
+			int col = x;
+
+			GridCell & cell(getCellByIndex(row, col));
+			if (ourUnits)
+			{
+				BOOST_FOREACH(BWAPI::Unit * unit, cell.ourUnits)
+				{
+					BWAPI::Position d(unit->getPosition() - center);
+					if (d.x() * d.x() + d.y() * d.y() <= radiusSq)
+					{
+						if (!contains(units, unit))
+						{
+							units.push_back(unit);
+						}
+					}
+				}
+			}
+			if (oppUnits)
+			{
+				BOOST_FOREACH(BWAPI::Unit * unit, cell.oppUnits) if (unit->getType() != BWAPI::UnitTypes::Unknown)
+				{
+					BWAPI::Position d(unit->getPosition() - center);
+					if (d.x() * d.x() + d.y() * d.y() <= radiusSq)
+					{
+						if (!contains(units, unit))
+						{
+							units.push_back(unit);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 bool MapGrid::contains(UnitVector & units, BWAPI::Unit * unit) 
 {
 	for (size_t i(0); i<units.size(); ++i) 
