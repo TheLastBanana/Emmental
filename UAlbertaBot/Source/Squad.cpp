@@ -49,10 +49,10 @@ void Squad::update()
 
 		meleeManager.execute(order);
 		rangedManager.execute(order);
-		transportManager.execute(order);
+		//transportManager.execute(order);
 
-		detectorManager.setUnitClosestToEnemy(unitClosestToEnemy());
-		detectorManager.execute(order);
+		//detectorManager.setUnitClosestToEnemy(unitClosestToEnemy());
+		//detectorManager.execute(order);
 	}
 }
 
@@ -288,11 +288,6 @@ BWAPI::Unit * Squad::unitClosestToEnemy()
 
 	BOOST_FOREACH (BWAPI::Unit * unit, units)
 	{
-		if (unit->getType() == BWAPI::UnitTypes::Protoss_Observer)
-		{
-			continue;
-		}
-
 		// the distance to the order position
 		int dist = MapTools::Instance().getGroundDistance(unit->getPosition(), order.position);
 
@@ -307,11 +302,6 @@ BWAPI::Unit * Squad::unitClosestToEnemy()
 	{
 		BOOST_FOREACH (BWAPI::Unit * unit, units)
 		{
-			if (unit->getType() == BWAPI::UnitTypes::Protoss_Observer)
-			{
-				continue;
-			}
-
 			// the distance to the order position
 			int dist = unit->getDistance(BWAPI::Position(BWAPI::Broodwar->enemy()->getStartLocation()));
 
