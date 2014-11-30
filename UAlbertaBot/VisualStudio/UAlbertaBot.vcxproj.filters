@@ -168,6 +168,9 @@
     <ClCompile Include="..\Source\BunkerManager.cpp">
       <Filter>game\macro\managers</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\micromanagement\VultureManager.cpp">
+      <Filter>game\combat\micro\generic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\CombatCommander.h">
@@ -301,6 +304,9 @@
     </ClInclude>
     <ClInclude Include="..\Source\BunkerManager.h">
       <Filter>game\macro\managers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\micromanagement\VultureManager.h">
+      <Filter>game\combat\micro\generic</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
