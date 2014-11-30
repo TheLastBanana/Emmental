@@ -1,6 +1,40 @@
 #include "common.h"
 #include "BunkerManager.h"
 
+BunkerManager::BunkerManager()
+{
+	bunkerRepairSlave = 0; 
+	maxReplaceSlave = 6; 
+	replacedSlave = 0; 
+	start = BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation());
+
+	// ASCII art from http://www.retrojunkie.com/asciiart/food/cheese.htm
+	// 11 lines max is the chat high.
+	/*BWAPI::Broodwar->sendText(".      ___ ___");
+	BWAPI::Broodwar->sendText(".     /\\ (_)    \\");
+	BWAPI::Broodwar->sendText(".    /  \\      (_,");
+	BWAPI::Broodwar->sendText(".   _)  _\\  _     \\");
+	BWAPI::Broodwar->sendText(".  /   (_)\\_( )____\\");
+	BWAPI::Broodwar->sendText(".  \\_     /    _  _/");
+	BWAPI::Broodwar->sendText(".    )  /\\/  _ (_)(");
+	BWAPI::Broodwar->sendText(".    \\ \\_) (_)   /");
+	BWAPI::Broodwar->sendText(".     \\/______/");
+	BWAPI::Broodwar->sendText("Good luck and have cheese.");
+	*/
+
+	BWAPI::Broodwar->sendText(".       _--\"-.");
+	BWAPI::Broodwar->sendText(".    .-\"      \"-.");
+	BWAPI::Broodwar->sendText(".   |\"\"--..      '-.");
+	BWAPI::Broodwar->sendText(".   |     \"\"--..   '-.");
+	BWAPI::Broodwar->sendText(".   |.-.  .-\".   \"\"--..\".");
+	BWAPI::Broodwar->sendText(".   |'.'  -_'  .-.      |");
+	BWAPI::Broodwar->sendText(".   |     .-.  '-'    .-'");
+	BWAPI::Broodwar->sendText(".   '--..  '-'     .-. '.");
+	BWAPI::Broodwar->sendText(".      \"\"--..    '_'  |");
+	BWAPI::Broodwar->sendText("Good luck \"\"--..   |");
+	BWAPI::Broodwar->sendText("Have cheese   \"-' ");
+}
+
 void BunkerManager::executeMicro(const UnitVector & targets)
 {
 	// Pfffft units are in wait in bunkers and attack automatically.
