@@ -40,19 +40,17 @@ void Squad::update()
 
 		BWAPI::Broodwar->drawCircleMap(regroupPosition.x(), regroupPosition.y(), 30, BWAPI::Colors::Purple, true);
 
-		meleeManager.regroup(regroupPosition);
 		rangedManager.regroup(regroupPosition);
+		vultureManager.regroup(regroupPosition);
+		meleeManager.regroup(regroupPosition);
 	}
 	else // otherwise, execute micro
 	{
 		InformationManager::Instance().lastFrameRegroup = 1;
 
-		meleeManager.execute(order);
 		rangedManager.execute(order);
-		//transportManager.execute(order);
-
-		//detectorManager.setUnitClosestToEnemy(unitClosestToEnemy());
-		//detectorManager.execute(order);
+		vultureManager.execute(order);
+		meleeManager.execute(order);
 	}
 }
 
@@ -108,50 +106,42 @@ void Squad::setNearEnemyUnits()
 
 void Squad::setManagerUnits()
 {
-	UnitVector meleeUnits;
-	UnitVector rangedUnits;
-	UnitVector detectorUnits;
-	UnitVector transportUnits;
 	UnitVector bunkerUnits;
-	int bunkerUnitsNum = 0;
+	UnitVector vultures;
+	UnitVector wraiths;
+	UnitVector melee;
 
 	// add units to micro managers
 	BOOST_FOREACH(BWAPI::Unit * unit, units)
 	{
 		if(unit->isCompleted() && unit->getHitPoints() > 0 && unit->exists())
 		{
-			// select detector units
-			if (unit->getType().isDetector() && !unit->getType().isBuilding())
-			{
-				detectorUnits.push_back(unit);
-			}
-			// select transport units
-			else if (unit->getType() == BWAPI::UnitTypes::Protoss_Shuttle || unit->getType() == BWAPI::UnitTypes::Terran_Dropship)
-			{
-				transportUnits.push_back(unit);
-			}
 			// select marines to be defense and bunkers.
-			else if (unit->getType() == BWAPI::UnitTypes::Terran_Marine)
+			if (unit->getType() == BWAPI::UnitTypes::Terran_Marine)
 			{
 				bunkerUnits.push_back(unit);
 			}
-			// select ranged units
-			else if ((unit->getType().groundWeapon().maxRange() > 32) || (unit->getType() == BWAPI::UnitTypes::Protoss_Reaver))
+			// select vultures
+			else if (unit->getType() == BWAPI::UnitTypes::Terran_Vulture)
 			{
-				rangedUnits.push_back(unit);
+				vultures.push_back(unit);
 			}
-			// select melee units
-			else if (unit->getType().groundWeapon().maxRange() <= 32)
+			// select wraiths
+			else if (unit->getType() == BWAPI::UnitTypes::Terran_Wraith)
 			{
-				meleeUnits.push_back(unit);
+				wraiths.push_back(unit);
 			}
+			else if (unit->getType() == BWAPI::UnitTypes::Terran_SCV) {
+				melee.push_back(unit);
+			}
+			else BWAPI::Broodwar->printf("Warn: unclassified unit: %s",
+				unit->getType().c_str());
 		}
 	}
 
-	meleeManager.setUnits(meleeUnits);
-	rangedManager.setUnits(rangedUnits);
-	detectorManager.setUnits(detectorUnits);
-	transportManager.setUnits(detectorUnits);
+	vultureManager.setUnits(vultures);
+	rangedManager.setUnits(wraiths);
+	meleeManager.setUnits(melee);
 	BunkerManager::Instance().setUnits(bunkerUnits);
 }
 

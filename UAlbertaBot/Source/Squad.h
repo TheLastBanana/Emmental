@@ -1,24 +1,20 @@
 #pragma once
 
 #include "Common.h"
-#include "micromanagement/MeleeManager.h"
 #include "micromanagement/RangedManager.h"
-#include "micromanagement/DetectorManager.h"
-#include "micromanagement/TransportManager.h"
+#include "micromanagement/VultureManager.h"
+#include "micromanagement/MeleeManager.h"
 #include "SquadOrder.h"
 #include "DistanceMap.hpp"
 #include "StrategyManager.h"
 #include "CombatSimulation.h"
 #include "BunkerManager.h"
 
-class ZealotManager;
-class DarkTemplarManager;
-class DragoonManager;
-class ObserverManager;
+//class VultureManager;
 
 class MeleeManager;
 class RangedManager;
-class DetectorManager;
+class VultureManager;
 
 class Squad
 {
@@ -28,10 +24,9 @@ class Squad
 	bool				squadObserverNear(BWAPI::Position p);
 	
 	SquadOrder			order;
-	MeleeManager		meleeManager;
 	RangedManager		rangedManager;
-	DetectorManager		detectorManager;
-	TransportManager	transportManager;
+	VultureManager		vultureManager;
+	MeleeManager		meleeManager;
 
 	std::map<BWAPI::Unit *, bool>	nearEnemy;
 
