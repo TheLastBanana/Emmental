@@ -355,28 +355,39 @@ int RangedManager::getAttackPriority(BWAPI::Unit * rangedUnit, BWAPI::Unit * tar
 	bool canAttackUs = rangedUnitType.isFlyer() ?
 		(targetType.airWeapon() != BWAPI::WeaponTypes::None) :
 		(targetType.groundWeapon() != BWAPI::WeaponTypes::None);
-
+		
 	// harass prioritizes workers
 	if (order.type == order.Harass && targetType.isWorker())
 	{
-		return 4;
+		return 6;
 	}
 
 	// highest priority is something that can attack us or aid in combat
 	if (targetType == BWAPI::UnitTypes::Terran_Medic || canAttackUs ||
-		targetType ==  BWAPI::UnitTypes::Terran_Bunker) 
+		targetType ==  BWAPI::UnitTypes::Terran_Bunker || BWAPI::UnitTypes::Protoss_High_Templar) 
 	{
-		return 3;
+		return 5;
 	} 
+	else if ((rangedUnitType == BWAPI::UnitTypes::Terran_Wraith) && (!canAttackUs))
+	{
+		return 4;
+	}
 	// next priority is worker
 	else if (targetType.isWorker()) 
 	{
-		return 2;
+		return 3;
 	} 
+	//Absolute lowest priority:
+	else if (targetType == BWAPI::UnitTypes::Protoss_Interceptor ||
+		targetType == BWAPI::UnitTypes::Zerg_Egg ||
+		targetType == BWAPI::UnitTypes::Zerg_Larva)
+	{
+		return 1;
+	}
 	// then everything else
 	else 
 	{
-		return 1;
+		return 2;
 	}
 }
 

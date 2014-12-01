@@ -699,7 +699,7 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	static int wantIonThrusters = 1; //just in case
 	// Build SCV
 	int numSCV = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_SCV);
-	int scvWanted = numSCV + 4 * (numCC);
+	int scvWanted = numSCV + 3 * (numCC);
 	if (scvWanted > (numCC)* 26)
 	{
 		scvWanted = (numCC)* 26;
@@ -708,9 +708,16 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 
 	// Build Marines
 	//int numMarines =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Marine);
-	int marinesWanted = 6;
-	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Marine, marinesWanted, 10, false));
-
+	int marinesWanted = 4 + 2 * BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Bunker);
+	int barracksWanted = 1;
+	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Barracks) > 0)
+	{
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Marine, marinesWanted, 10, false));
+	}
+	else 
+	{
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Barracks));
+	}
 	// Build factories
 	//int factoriesWanted = (BWAPI::Broodwar->getFrameCount() < 10000) ? 1 : 4;
 
@@ -722,13 +729,18 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	int vulturesWanted = numVultures + numFac;
 	if (numVultures > 2) factoriesWanted = 2;
 	if (numVultures > 6) factoriesWanted = 3;
-	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Factory, factoriesWanted, 1, false));
-	//if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Factory) > 0) {
-	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Vulture, vulturesWanted, 2, false));
-	//}
-
+	if (numCC > 1) factoriesWanted = 4;
+	if (numFac == 4) factoriesWanted = 5;
 	//build refinery
-	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Refinery, 1, 11, false));
+	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Refinery, numCC, 11, false));
+	
+
+	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Factory, factoriesWanted, 1, false));
+	if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Factory) > 0)
+	{
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Vulture, vulturesWanted, 2, false));
+	}
+
 
 	// build bunkers
 	if ((BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Barracks) > 0) && (numSCV > 11)) {
@@ -744,10 +756,10 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	*/
 
 	// build machine shops
-	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 0 &&
-		BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Machine_Shop) == 0)
+	if ((BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 0) &&
+		(numVultures > 0))
 	{
-		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Machine_Shop, 1, 1, false));
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Machine_Shop, 1, 9, false));
 	}
 
 	// Make sure we have a machine shop
@@ -770,10 +782,10 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	}
 
 	//build starport
-	if ((numVultures >= 5) &&
+	if ((numVultures >= 6) &&
 		(numFac > 1))
 	{
-		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Starport, 2, 0, false));
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Starport, 2, 1, false));
 	}
 
 	// build wraith
@@ -793,14 +805,11 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	//If we have a ton of extra money we should try to spend it.
 	//This isn't working.
 	// Build armory (upgrades)
-	/*if (BWAPI::Broodwar->self()->minerals() > 800) {
-	// Question: remove?
-	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 2)
-	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Factory, 1));
-
-	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Armory) < 1)
-	goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Armory, 1));
-	}*/
+	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) >= 2)
+	{ 
+		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Armory) < 1)
+			goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Armory, 1));
+	}
 
 	//Comsat addon.
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 1)
@@ -811,7 +820,7 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 		}
 		else
 		{
-			goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Comsat_Station, 1, 11, false));
+			goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Comsat_Station, 1, 11, true));
 		}
 	}
 
@@ -819,12 +828,21 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	// Build upgrades
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Armory) > 0) {
 		if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Terran_Vehicle_Weapons) < 2)
-			goal.push_back(BuildOrderGoalItem(BWAPI::UpgradeTypes::Terran_Vehicle_Weapons, 1));
+			goal.push_back(BuildOrderGoalItem(BWAPI::UpgradeTypes::Terran_Vehicle_Weapons, 1, 1, false));
 
 		if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Terran_Vehicle_Plating) < 2)
-			goal.push_back(BuildOrderGoalItem(BWAPI::UpgradeTypes::Terran_Vehicle_Plating, 1));
+			goal.push_back(BuildOrderGoalItem(BWAPI::UpgradeTypes::Terran_Vehicle_Plating, 1, 1, false));
 	}
+	
+	if (InformationManager::Instance().enemyHasCloakedUnits())
+	{
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Engineering_Bay, 1, 10, false));
 
+		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Engineering_Bay) > 0)
+		{
+			goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Missile_Turret, 2, 10, false));
+		}
+	}
 	return goal;
 }
 
