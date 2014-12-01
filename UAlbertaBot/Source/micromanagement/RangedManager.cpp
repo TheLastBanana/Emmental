@@ -199,13 +199,17 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 		BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Spider_Mines) &&
 		rangedUnit->getSpiderMineCount() > 0)
 	{
+		bool canDrop = true;
 		BOOST_FOREACH(BWAPI::Unit* u, BWAPI::Broodwar->self()->getUnits()) {
 			if (u->getType() != BWAPI::UnitTypes::Terran_Vulture_Spider_Mine) continue; // Only looking for mines
-			if (rangedUnit->getDistance(u) > 10) { // Gotta be at least 10 units away to drop a mine, ensures not spamdrop->lockup
-				bool dropSuccess = rangedUnit->useTech(BWAPI::TechTypes::Spider_Mines, rangedUnit->getPosition());
-				kite = false; // If we're trying to drop a mine, don't kite
+			if (rangedUnit->getDistance(u) < 10) { // Gotta be at least 10 units away to drop a mine, ensures not spamdrop->lockup
+				canDrop = false;
 				break;
 			}
+		}
+		if (canDrop) {
+			bool dropSuccess = rangedUnit->useTech(BWAPI::TechTypes::Spider_Mines, rangedUnit->getPosition());
+			kite = false; // If we're trying to drop a mine, don't kite
 		}
 	}
 
