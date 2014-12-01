@@ -105,32 +105,6 @@ void RangedManager::executeMicro(const UnitVector & targets)
 	// for each zealot
 	BOOST_FOREACH(BWAPI::Unit * rangedUnit, rangedUnits)
 	{
-		// low health; drop a mine before we die
-		/*
-		if (rangedUnit->getHitPoints() < 20 &&
-			rangedUnit->getSpiderMineCount() == 3) // TODO: make this only apply to the last mine
-		{
-			// don't act if we're trying to mine
-			if (!rangedUnit->isIdle() &&
-				rangedUnit->getLastCommand().getTechType() == BWAPI::TechTypes::Spider_Mines)
-			{
-				continue;
-			}
-
-			// drop a mine
-			else
-			{
-				bool success = rangedUnit->useTech(BWAPI::TechTypes::Spider_Mines, rangedUnit->getPosition());
-				if (success) BWAPI::Broodwar->printf("Placing mine");
-			}
-		}
-		*/
-		
-		if (rangedUnit->getOrder() == BWAPI::Orders::VultureMine || rangedUnit->getOrder() == BWAPI::Orders::PlaceMine)
-		{
-			continue;
-		}
-
 		// if the order is to attack or defend
 		if (order.type == order.Attack || order.type == order.Defend || order.type == order.Harass) {
 
@@ -218,17 +192,21 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 			(int)range, BWAPI::Colors::Cyan);
 	}
 
-	// If the unit isn't visible, we're a vulture, they aren't flying, we've researched mines
+	// If the unit is a cloaking unit, we're a vulture, we've researched mines
 	// and we have mines left, try and drop a mine
-	if (!target->isVisible() &&
+	if ((target->getType() == BWAPI::UnitTypes::Zerg_Lurker || target->getType() == BWAPI::UnitTypes::Protoss_Dark_Templar) &&
 		rangedUnit->getType() == BWAPI::UnitTypes::Terran_Vulture &&
-		!target->getType().isFlyer() &&
-		BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Spider_Mines))
+		BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Spider_Mines) &&
+		rangedUnit->getSpiderMineCount() > 0)
 	{
-		// Success if we have mines left
-		bool dropSuccess = rangedUnit->useTech(BWAPI::TechTypes::Spider_Mines);
-		kite = !dropSuccess; // If we're trying to drop a mine, don't kite
-		BWAPI::Broodwar->printf("We see some one that isn't visible, trying to drop a mine: %d", dropSuccess);
+		BOOST_FOREACH(BWAPI::Unit* u, BWAPI::Broodwar->self()->getUnits()) {
+			if (u->getType() != BWAPI::UnitTypes::Terran_Vulture_Spider_Mine) continue; // Only looking for mines
+			if (rangedUnit->getDistance(u) > 10) { // Gotta be at least 10 units away to drop a mine, ensures not spamdrop->lockup
+				bool dropSuccess = rangedUnit->useTech(BWAPI::TechTypes::Spider_Mines, rangedUnit->getPosition());
+				kite = false; // If we're trying to drop a mine, don't kite
+				break;
+			}
+		}
 	}
 
 	// if we can't shoot, run away
@@ -359,12 +337,19 @@ int RangedManager::getAttackPriority(BWAPI::Unit * rangedUnit, BWAPI::Unit * tar
 	// harass prioritizes workers
 	if (order.type == order.Harass && targetType.isWorker())
 	{
+		return 7;
+
+	}
+	
+	if (((target->getType() == BWAPI::UnitTypes::Zerg_Lurker && target->isCloaked()) ||
+		target->getType() == BWAPI::UnitTypes::Protoss_Dark_Templar))
+	{
 		return 6;
 	}
-
-	// highest priority is something that can attack us or aid in combat
-	if (targetType == BWAPI::UnitTypes::Terran_Medic || canAttackUs ||
-		targetType ==  BWAPI::UnitTypes::Terran_Bunker || BWAPI::UnitTypes::Protoss_High_Templar) 
+	// second highest priority is something that can attack us or aid in combat
+	else if (targetType == BWAPI::UnitTypes::Terran_Medic || canAttackUs ||
+		targetType ==  BWAPI::UnitTypes::Terran_Bunker || BWAPI::UnitTypes::Protoss_High_Templar ||
+		BWAPI::UnitTypes::Protoss_Reaver) 
 	{
 		return 5;
 	} 

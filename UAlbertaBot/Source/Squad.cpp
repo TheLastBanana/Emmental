@@ -15,8 +15,6 @@ void Squad::update()
 	// update all necessary unit information within this squad
 	updateUnits();
 
-	// determine whether or not we should regroup
-	const bool needToRegroup(needsToRegroup());
 	
 	// draw some debug info
 	if (Options::Debug::DRAW_UALBERTABOT_DEBUG && order.type == SquadOrder::Attack) 
@@ -30,26 +28,60 @@ void Squad::update()
 		}
 	}
 
-	// if we do need to regroup, do it
-	if (needToRegroup)
+	// determine whether or not we should regroup vultures
+	const bool vulturesNeedToRegroup(needsToRegroup(vultureManager.getUnits()));
+	if (vulturesNeedToRegroup) {
+		InformationManager::Instance().lastFrameRegroup = 1;
+
+		const BWAPI::Position regroupPosition(calcRegroupPosition(vultureManager.getUnits()));
+		BWAPI::Broodwar->drawTextScreen(200, 150, "REGROUP");
+
+		BWAPI::Broodwar->drawCircleMap(regroupPosition.x(), regroupPosition.y(), 30, BWAPI::Colors::Purple, true);
+
+		vultureManager.regroup(regroupPosition);
+	}
+	else // otherwise, execute micro
 	{
 		InformationManager::Instance().lastFrameRegroup = 1;
 
-		const BWAPI::Position regroupPosition(calcRegroupPosition());
+		vultureManager.execute(order);
+	}
+
+	// determine whether or not we should regroup wraiths
+	const bool wraithsNeedToRegroup(needsToRegroup(rangedManager.getUnits()));
+	if (wraithsNeedToRegroup) {
+		InformationManager::Instance().lastFrameRegroup = 1;
+
+		const BWAPI::Position regroupPosition(calcRegroupPosition(rangedManager.getUnits()));
 		BWAPI::Broodwar->drawTextScreen(200, 150, "REGROUP");
 
 		BWAPI::Broodwar->drawCircleMap(regroupPosition.x(), regroupPosition.y(), 30, BWAPI::Colors::Purple, true);
 
 		rangedManager.regroup(regroupPosition);
-		vultureManager.regroup(regroupPosition);
-		meleeManager.regroup(regroupPosition);
 	}
 	else // otherwise, execute micro
 	{
 		InformationManager::Instance().lastFrameRegroup = 1;
 
 		rangedManager.execute(order);
-		vultureManager.execute(order);
+	}
+
+	// determine whether or not we should regroup melee (workers)
+	const bool meleeNeedToRegroup(needsToRegroup(meleeManager.getUnits()));
+	if (meleeNeedToRegroup) {
+		InformationManager::Instance().lastFrameRegroup = 1;
+
+		const BWAPI::Position regroupPosition(calcRegroupPosition(meleeManager.getUnits()));
+		BWAPI::Broodwar->drawTextScreen(200, 150, "REGROUP");
+
+		BWAPI::Broodwar->drawCircleMap(regroupPosition.x(), regroupPosition.y(), 30, BWAPI::Colors::Purple, true);
+
+		meleeManager.regroup(regroupPosition);
+	}
+	else // otherwise, execute micro
+	{
+		InformationManager::Instance().lastFrameRegroup = 1;
+
 		meleeManager.execute(order);
 	}
 }
@@ -133,7 +165,8 @@ void Squad::setManagerUnits()
 			}
 			else if (unit->getType() == BWAPI::UnitTypes::Terran_SCV) {
 				melee.push_back(unit);
-			}
+			} 
+			else if (unit->getType() == BWAPI::UnitTypes::Terran_Vulture_Spider_Mine) {} // Don't micro a mine
 			else BWAPI::Broodwar->printf("Warn: unclassified unit: %s",
 				unit->getType().c_str());
 		}
@@ -146,10 +179,10 @@ void Squad::setManagerUnits()
 }
 
 // calculates whether or not to regroup
-bool Squad::needsToRegroup()
+bool Squad::needsToRegroup(const UnitVector & u)
 {
 	// if we are not attacking, never regroup
-	if (units.empty() || !(order.type == SquadOrder::Attack || order.type == SquadOrder::Harass))
+	if (u.empty() || !(order.type == SquadOrder::Attack || order.type == SquadOrder::Harass))
 	{
 		regroupStatus = std::string("\x04 No combat units available");
 		return false;
@@ -159,8 +192,8 @@ bool Squad::needsToRegroup()
 	if (BWAPI::Broodwar->self()->getRace() == BWAPI::Races::Terran &&
 		StrategyManager::Instance().getCurrentStrategy() == StrategyManager::TerranVultureRush)
 	{
-		// start attacking when we have 5 vultures
-		return BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Vulture) < 5;
+		// start attacking when we have 5 things in the vector
+		return u.size() < 5;
 	}
 
 	// if we are DT rushing and we haven't lost a DT yet, no retreat!
@@ -242,13 +275,13 @@ BWAPI::Position Squad::calcCenter()
 	return BWAPI::Position(accum.x() / units.size(), accum.y() / units.size());
 }
 
-BWAPI::Position Squad::calcRegroupPosition()
+BWAPI::Position Squad::calcRegroupPosition(const UnitVector & u)
 {
 	BWAPI::Position regroup(0,0);
 
 	int minDist(100000);
 
-	BOOST_FOREACH(BWAPI::Unit * unit, units)
+	BOOST_FOREACH(BWAPI::Unit * unit, u)
 	{
 		if (!nearEnemy[unit])
 		{
