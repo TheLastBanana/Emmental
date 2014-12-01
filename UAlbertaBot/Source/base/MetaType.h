@@ -56,7 +56,7 @@ struct MetaType {
 		}
 	}
 
-	int supplyRequired()
+	int supplyRequired() const
 	{
 		if (isUnit())
 		{
@@ -78,7 +78,7 @@ struct MetaType {
 		return isUnit() ? unitType.gasPrice() : (isTech() ? techType.gasPrice() : upgradeType.gasPrice());
 	}
 
-	BWAPI::UnitType whatBuilds()
+	BWAPI::UnitType whatBuilds() const
 	{
 		return isUnit() ? unitType.whatBuilds().first : (isTech() ? techType.whatResearches() : upgradeType.whatUpgrades());
 	}

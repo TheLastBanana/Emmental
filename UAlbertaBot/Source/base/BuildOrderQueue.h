@@ -53,8 +53,8 @@ public:
 
 	void removeAll(MetaType m);									// removes all matching meta types from queue
 
-	BuildOrderItem<PRIORITY_TYPE> & getHighestPriorityItem();	// returns the highest priority item
-	BuildOrderItem<PRIORITY_TYPE> & getNextHighestPriorityItem();	// returns the highest priority item
+	const BuildOrderItem<PRIORITY_TYPE> & getHighestPriorityItem();	// returns the highest priority item
+	const BuildOrderItem<PRIORITY_TYPE> & getNextHighestPriorityItem();	// returns the highest priority item
 
 	bool canSkipItem();
 	bool hasNextHighestPriorityItem();								// returns the highest priority item

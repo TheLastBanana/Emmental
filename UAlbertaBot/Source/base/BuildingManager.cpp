@@ -211,6 +211,12 @@ BWAPI::TilePosition BuildingManager::getBuildingLocation(const Building & b)
 
 				testLocation = position;
 			}
+			else if (b.type.getID() == BWAPI::UnitTypes::Terran_Missile_Turret)
+			{
+				BWAPI::TilePosition choke = MapTools::Instance().getClosestChokepoint(BWAPI::Broodwar->self()->getStartLocation());
+				// place the turret near the chokepoint on the right side.
+				testLocation = BuildingPlacer::Instance().getPointClosestTo(choke, BWAPI::Broodwar->self()->getStartLocation(), b, distance);
+			}
 			else
 			{
 				// get a position within our region
