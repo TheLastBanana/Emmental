@@ -102,8 +102,13 @@ void BunkerManager::updateBunkerSlave()
 		if (bunkerToRepair->isCompleted() && bunkerToRepair->getHitPoints() < 350 && !bunkerRepairSlave->isRepairing())
 			bunkerRepairSlave->repair(bunkerToRepair);
 	}
-	// tell slave to stay near bunker if it is not repairing.
+	// make sure the slave is always behind the bunker
 	BWAPI::Unit* bunker = *bunkersAll.begin();
+	if (!bunkerRepairSlave->isRepairing() && (bunkerRepairSlave->getDistance(start) > bunker->getDistance(start)) && 
+		!bunkerRepairSlave->isStuck() && bunkerRepairSlave->getDistance(bunker) < 60)
+		bunkerRepairSlave->move(start);
+
+	// tell slave to stay near bunker if it is not repairing.
 	if (!bunkerRepairSlave->isRepairing() && bunkerRepairSlave->getDistance(bunker) > 60)
 		bunkerRepairSlave->move(bunker->getPosition());
 }
