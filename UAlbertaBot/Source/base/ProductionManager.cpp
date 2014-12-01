@@ -209,7 +209,7 @@ void ProductionManager::manageBuildOrderQueue()
 			producer = WorkerManager::Instance().getBuilder(b, false);
 
 			// predict the worker movement to that building location
-			predictWorkerMovement(b);
+			//predictWorkerMovement(b);
 		}
 
 		// if we can make the current item
