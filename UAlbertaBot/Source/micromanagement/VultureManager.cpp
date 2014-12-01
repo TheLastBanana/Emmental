@@ -2,79 +2,6 @@
 
 VultureManager::VultureManager() {}
 
-void VultureManager::execute(const SquadOrder & inputOrder)
-{
-	// Nothing to do if we have no units
-	if (getUnits().empty() || !(inputOrder.type == SquadOrder::Attack || inputOrder.type == SquadOrder::Defend || inputOrder.type == SquadOrder::Harass))
-	{
-		//BWAPI::Broodwar->printf("Gots no units, fix shit up (%d)", order.type);
-		return;
-	}
-	order = inputOrder;
-	drawOrderText();
-
-	// Discover enemies within region of interest
-	UnitVector nearbyEnemies;
-
-	// if the order is to defend, we only care about units in the radius of the defense
-	if (order.type == order.Defend)
-	{
-		MapGrid::Instance().GetUnitsWithInvisible(nearbyEnemies, order.position, 800, false, true);
-
-	} // otherwise we want to see everything on the way
-	else if (order.type == order.Attack || order.type == order.Harass)
-	{
-		MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 800, false, true);
-		BOOST_FOREACH(BWAPI::Unit * unit, getUnits())
-		{
-			BWAPI::Unit * u = unit;
-			BWAPI::UnitType t = u->getType();
-			MapGrid::Instance().GetUnitsWithInvisible(nearbyEnemies, unit->getPosition(), 800, false, true);
-		}
-	}
-
-	// the following block of code attacks all units on the way to the order position
-	// we want to do this if the order is attack, defend, or harass
-	if (order.type == order.Attack || order.type == order.Defend || order.type == order.Harass)
-	{
-		// if this is a worker defense force
-		if (getUnits().size() == 1 && getUnits()[0]->getType().isWorker())
-		{
-			executeMicro(nearbyEnemies);
-		}
-		// otherwise it is a normal attack force
-		else
-		{
-			// remove enemy worker units unless they are in one of their occupied regions
-			UnitVector workersRemoved;
-
-			BOOST_FOREACH(BWAPI::Unit * enemyUnit, nearbyEnemies)
-			{
-				// if its not a worker add it to the targets
-				if (!enemyUnit->getType().isWorker())
-				{
-					workersRemoved.push_back(enemyUnit);
-				}
-				// if it is a worker
-				else
-				{
-					BOOST_FOREACH(BWTA::Region * enemyRegion, InformationManager::Instance().getOccupiedRegions(BWAPI::Broodwar->enemy()))
-					{
-						// only add it if it's in their region
-						if (BWTA::getRegion(BWAPI::TilePosition(enemyUnit->getPosition())) == enemyRegion)
-						{
-							workersRemoved.push_back(enemyUnit);
-						}
-					}
-				}
-			}
-
-			// Allow micromanager to handle enemies
-			executeMicro(workersRemoved);
-		}
-	}
-}
-
 void VultureManager::executeMicro(const UnitVector & targets)
 {
 	const UnitVector & rangedUnits = getUnits();
@@ -88,33 +15,37 @@ void VultureManager::executeMicro(const UnitVector & targets)
 			continue;
 		}
 
-		rangedUnitTargets.push_back(targets[i]);
-		// Used to removed not visible units here
+		// conditions for targeting
+		if (targets[i]->isVisible())
+		{
+			rangedUnitTargets.push_back(targets[i]);
+		}
+	}
+
+	// figure out stealth targets
+	UnitVector stealthTargets;
+	BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->enemy()->getUnits())
+	{
+		// Add stealth units. If they have wraiths hope our wraiths fight them unstealthed
+		if (unit->getType() == BWAPI::UnitTypes::Zerg_Lurker ||
+			unit->getType() == BWAPI::UnitTypes::Protoss_Dark_Templar)
+		{
+			stealthTargets.push_back(unit);
+		}
 	}
 
 	// for each zealot
 	BOOST_FOREACH(BWAPI::Unit * rangedUnit, rangedUnits)
 	{
-		// low health; drop a mine before we die
-		/*
-		if (rangedUnit->getHitPoints() < 20 &&
-		rangedUnit->getSpiderMineCount() == 3) // TODO: make this only apply to the last mine
-		{
-		// don't act if we're trying to mine
-		if (!rangedUnit->isIdle() &&
-		rangedUnit->getLastCommand().getTechType() == BWAPI::TechTypes::Spider_Mines)
-		{
-		continue;
+		// Deal with stealth units on a unit by unit basis
+		if (BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Spider_Mines) &&
+			rangedUnit->getSpiderMineCount() > 0) {
+				BOOST_FOREACH(BWAPI::Unit * stealthEnemy, stealthTargets) {
+					if (rangedUnit->getDistance(stealthEnemy) <= rangedUnit->getType().sightRange()) {
+						rangedUnitTargets.push_back(stealthEnemy);
+					}
+				}
 		}
-
-		// drop a mine
-		else
-		{
-		bool success = rangedUnit->useTech(BWAPI::TechTypes::Spider_Mines, rangedUnit->getPosition());
-		if (success) BWAPI::Broodwar->printf("Placing mine");
-		}
-		}
-		*/
 
 		if (rangedUnit->getOrder() == BWAPI::Orders::VultureMine || rangedUnit->getOrder() == BWAPI::Orders::PlaceMine)
 		{

@@ -165,7 +165,8 @@ void Squad::setManagerUnits()
 			}
 			else if (unit->getType() == BWAPI::UnitTypes::Terran_SCV) {
 				melee.push_back(unit);
-			}
+			} 
+			else if (unit->getType() == BWAPI::UnitTypes::Terran_Vulture_Spider_Mine) {} // Don't micro a mine
 			else BWAPI::Broodwar->printf("Warn: unclassified unit: %s",
 				unit->getType().c_str());
 		}
