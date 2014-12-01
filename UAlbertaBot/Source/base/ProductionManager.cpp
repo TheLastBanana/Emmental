@@ -181,7 +181,7 @@ void ProductionManager::manageBuildOrderQueue()
 	}
 
 	// the current item to be used
-	BuildOrderItem<PRIORITY_TYPE> & currentItem = queue.getHighestPriorityItem();
+	BuildOrderItem<PRIORITY_TYPE> currentItem = queue.getHighestPriorityItem();
 
 	// while there is still something left in the queue
 	while (!queue.isEmpty()) 

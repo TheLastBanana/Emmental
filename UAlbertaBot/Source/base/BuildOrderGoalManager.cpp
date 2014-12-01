@@ -70,7 +70,13 @@ bool BuildOrderGoalManager::isCompleted(const BuildOrderGoalItem & bogi, const B
 	// if we have not upgraded to that level, return false
 	else if (bogi.metaType.type == MetaType::Upgrade)
 	{
-		if (count + BWAPI::Broodwar->self()->getUpgradeLevel(bogi.metaType.upgradeType) < bogi.count)
+		count += BWAPI::Broodwar->self()->getUpgradeLevel(bogi.metaType.upgradeType);
+		if (BWAPI::Broodwar->self()->isUpgrading(bogi.metaType.upgradeType))
+		{
+			++count;
+		}
+
+		if (count < bogi.count)
 		{
 			return false;
 		}

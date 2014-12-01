@@ -20,7 +20,7 @@ void BuildOrderQueue::clearAll()
 	lowestPriority = 0;
 }
 
-BuildOrderItem<PRIORITY_TYPE> & BuildOrderQueue::getHighestPriorityItem() 
+const BuildOrderItem<PRIORITY_TYPE> & BuildOrderQueue::getHighestPriorityItem()
 {
 	// reset the number of skipped items to zero
 	numSkippedItems = 0;
@@ -29,7 +29,7 @@ BuildOrderItem<PRIORITY_TYPE> & BuildOrderQueue::getHighestPriorityItem()
 	return queue.back();
 }
 
-BuildOrderItem<PRIORITY_TYPE> & BuildOrderQueue::getNextHighestPriorityItem() 
+const BuildOrderItem<PRIORITY_TYPE> & BuildOrderQueue::getNextHighestPriorityItem()
 {
 	assert(queue.size() - 1 - numSkippedItems >= 0);
 
