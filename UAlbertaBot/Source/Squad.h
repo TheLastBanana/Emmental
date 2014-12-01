@@ -38,7 +38,7 @@ class Squad
 	void				setUnits(const UnitVector & u)	{ units = u; }
 	
 	bool				unitNearEnemy(BWAPI::Unit * unit);
-	bool				needsToRegroup();
+	bool				needsToRegroup(const UnitVector & u);
 	BWAPI::Unit *		getRegroupUnit();
 	int					squadUnitsNear(BWAPI::Position p);
 
@@ -55,7 +55,7 @@ public:
 	~Squad() {}
 
 	BWAPI::Position		calcCenter();
-	BWAPI::Position		calcRegroupPosition();
+	BWAPI::Position		calcRegroupPosition(const UnitVector & u);
 
 	void				update();
 
