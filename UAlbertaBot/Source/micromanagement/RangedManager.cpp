@@ -165,23 +165,9 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 			speed *= 1.5;
 	}
 
-	// don't kite damageless enemies
-	bool isFlyer = rangedUnit->getType().isFlyer();
-	if ((!isFlyer && target->getType().groundWeapon() == BWAPI::WeaponTypes::None) ||
-		(isFlyer && target->getType().airWeapon() == BWAPI::WeaponTypes::None))
-	{
-		kite = false;
-	}
-
 	// stay still if it'll take us longer to get back in range than to cooldown the weapon
 	double	timeToEnter = std::max(0.0, (dist - range) / speed + rangedUnit->getType().acceleration() / 256.0);
 	if ((timeToEnter >= rangedUnit->getGroundWeaponCooldown()) && (dist >= minDist))
-	{
-		kite = false;
-	}
-
-	// don't kite buildings
-	if (target->getType().isBuilding() && target->getType() != BWAPI::UnitTypes::Terran_Bunker)
 	{
 		kite = false;
 	}
