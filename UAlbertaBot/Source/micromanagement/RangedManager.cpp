@@ -24,20 +24,38 @@ bool RangedManager::checkFleePosition(const BWAPI::Unit * rangedUnit, const Unit
 		return false;
 	}
 
-	// Check that no enemies in view can target this position
-	BOOST_FOREACH(BWAPI::Unit * enemy, BWAPI::Broodwar->enemy()->getUnits())
+	// check for danger
+	BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->getAllUnits())
 	{
-		// ignore the enemy if it's not going to damage us
-		BWAPI::UnitType rangedUnitType = rangedUnit->getType();
-		BWAPI::UnitType targetType = enemy->getType();
-		bool canAttackUs = rangedUnitType.isFlyer() ?
-						   (targetType.airWeapon() != BWAPI::WeaponTypes::None) :
-						   (targetType.groundWeapon() != BWAPI::WeaponTypes::None);
-		if (!canAttackUs || enemy->getType().isWorker()) continue;
-
-		if (enemy->getDistance(fleePosition) < getEffectiveRange(rangedUnit, enemy))
+		// check that no enemies in view can target this position
+		if (unit->getPlayer() == BWAPI::Broodwar->self())
 		{
-			return false;
+			// ignore the enemy if it's not going to damage us
+			BWAPI::UnitType rangedUnitType = rangedUnit->getType();
+			BWAPI::UnitType targetType = unit->getType();
+			bool canAttackUs = rangedUnitType.isFlyer() ?
+							   (targetType.airWeapon() != BWAPI::WeaponTypes::None) :
+							   (targetType.groundWeapon() != BWAPI::WeaponTypes::None);
+			if (!canAttackUs || unit->getType().isWorker()) continue;
+
+			if (unit->getDistance(fleePosition) < getEffectiveRange(rangedUnit, unit))
+			{
+				return false;
+			}
+		}
+
+		// avoid spider mines
+		if (unit->getType() == BWAPI::UnitTypes::Terran_Vulture_Spider_Mine &&
+			(rangedUnit->getDistance(unit) < unit->getType().groundWeapon().outerSplashRadius()))
+		{
+			// determine if it can attack anyone
+			int enemiesInRange = 0;
+			BOOST_FOREACH(const BWAPI::Unit * inRange, unit->getUnitsInRadius(unit->getType().seekRange()))
+			{
+				if (unit->getPlayer() != BWAPI::Broodwar->self()) ++enemiesInRange;
+			}
+
+			if (enemiesInRange > 0) return false;
 		}
 	}
 
