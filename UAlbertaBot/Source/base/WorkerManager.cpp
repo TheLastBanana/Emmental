@@ -2,7 +2,7 @@
 #include "WorkerManager.h"
 
 WorkerManager::WorkerManager() 
-    : workersPerRefinery(3) 
+    : workersPerRefinery(2) 
 {
     previousClosestWorker = NULL;
 }
