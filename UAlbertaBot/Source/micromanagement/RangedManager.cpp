@@ -182,6 +182,14 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 		BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Ion_Thrusters) == 1) {
 			speed *= 1.5;
 	}
+	
+	// don't kite buildings with Wraiths because it kind of sucks
+	if (target->getType().isBuilding() &&
+		target->getType() != BWAPI::UnitTypes::Terran_Bunker &&
+		rangedUnit->getType() == BWAPI::UnitTypes::Terran_Wraith)
+	{
+		kite = false;
+	}
 
 	// stay still if it'll take us longer to get back in range than to cooldown the weapon
 	double	timeToEnter = std::max(0.0, (dist - range) / speed + rangedUnit->getType().acceleration() / 256.0);
