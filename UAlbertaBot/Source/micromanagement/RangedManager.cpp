@@ -28,7 +28,7 @@ bool RangedManager::checkFleePosition(const BWAPI::Unit * rangedUnit, const Unit
 	BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->getAllUnits())
 	{
 		// check that no enemies in view can target this position
-		if (unit->getPlayer() == BWAPI::Broodwar->self())
+		if (unit->getPlayer() != BWAPI::Broodwar->self())
 		{
 			// ignore the enemy if it's not going to damage us
 			BWAPI::UnitType rangedUnitType = rangedUnit->getType();
