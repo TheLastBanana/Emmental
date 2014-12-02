@@ -767,8 +767,7 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	if ((BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 0) &&
 		(numVultures > 0))
 	{
-		BWAPI::Broodwar->printf("The fuck?");
-		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Machine_Shop, 1, 10, true));
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Machine_Shop, 1, 10, false));
 	}
 
 	// Make sure we have a machine shop
@@ -804,8 +803,8 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	}
 
 	//expand when secure
-	if (((numCC == 1) && (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Bunker) > 0)) 
-		&& ((numVultures >= 5 || (BWAPI::Broodwar->getFrameCount() > 9000))))
+	if ((((numCC == 1) && (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Bunker) > 0)) 
+		&& ((numVultures >= 5 || (BWAPI::Broodwar->getFrameCount() > 9000)))) || BWAPI::Broodwar->getFrameCount() > 12000)
 	{
 		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Command_Center, numCC + 1, 10, false));
 	}
@@ -833,7 +832,7 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 		}
 		else
 		{
-			goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Comsat_Station, 1, 11, true));
+			goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Comsat_Station, 1, 11, false));
 		}
 	}
 
