@@ -114,13 +114,16 @@ void ProductionManager::update()
 	}
 
 	// detect producer deadlock once per second
-	BWAPI::UnitType producer = queue.getHighestPriorityItem().metaType.whatBuilds();
-	if (producer != BWAPI::UnitTypes::None &&
-		(BWAPI::Broodwar->getFrameCount() % 24 == 0) &&
-		BWAPI::Broodwar->self()->allUnitCount(producer) == 0)
+	if (queue.size() > 0)
 	{
-		BWAPI::Broodwar->printf("Producer deadlock detected, new search!");
-		performBuildOrderSearch(StrategyManager::Instance().getBuildOrderGoal());
+		BWAPI::UnitType producer = queue.getHighestPriorityItem().metaType.whatBuilds();
+		if (producer != BWAPI::UnitTypes::None &&
+			(BWAPI::Broodwar->getFrameCount() % 24 == 0) &&
+			BWAPI::Broodwar->self()->allUnitCount(producer) == 0)
+		{
+			BWAPI::Broodwar->printf("Producer deadlock detected, new search!");
+			performBuildOrderSearch(StrategyManager::Instance().getBuildOrderGoal());
+		}
 	}
 
 	// if they have cloaked units get a new goal asap
