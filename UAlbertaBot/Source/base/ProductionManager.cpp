@@ -270,7 +270,21 @@ bool ProductionManager::canMakeNow(BWAPI::Unit * producer, MetaType t)
 	{
 		if (t.isUnit())
 		{
-			canMake = BWAPI::Broodwar->canMake(producer, t.unitType);
+			if (t.unitType.isAddon())
+			{
+				if (!producer)
+				{
+					canMake = false;
+				}
+				else
+				{
+					canMake = BWAPI::Broodwar->canMake(producer, t.unitType) && !producer->isTraining() && !producer->isResearching() && !producer->isUpgrading();
+				}
+			}
+			else
+			{
+				canMake = BWAPI::Broodwar->canMake(producer, t.unitType);
+			}
 		}
 		else if (t.isTech())
 		{
