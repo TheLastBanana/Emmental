@@ -345,8 +345,12 @@ int RangedManager::getAttackPriority(BWAPI::Unit * rangedUnit, BWAPI::Unit * tar
 
 	}
 	
+	// Target stealth highly if we're a vulture with mines
 	if (((target->getType() == BWAPI::UnitTypes::Zerg_Lurker && target->isCloaked()) ||
-		target->getType() == BWAPI::UnitTypes::Protoss_Dark_Templar))
+		target->getType() == BWAPI::UnitTypes::Protoss_Dark_Templar) &&
+		rangedUnitType == BWAPI::UnitTypes::Terran_Vulture &&
+		BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Spider_Mines) &&
+		rangedUnit->getSpiderMineCount() > 0)
 	{
 		return 6;
 	}
@@ -366,10 +370,11 @@ int RangedManager::getAttackPriority(BWAPI::Unit * rangedUnit, BWAPI::Unit * tar
 	{
 		return 3;
 	} 
-	//Absolute lowest priority:
+	//Absolute lowest priority
 	else if (targetType == BWAPI::UnitTypes::Protoss_Interceptor ||
 		targetType == BWAPI::UnitTypes::Zerg_Egg ||
-		targetType == BWAPI::UnitTypes::Zerg_Larva)
+		targetType == BWAPI::UnitTypes::Zerg_Larva ||
+		target->isCloaked())
 	{
 		return 1;
 	}
