@@ -181,17 +181,17 @@ BWAPI::TilePosition BuildingManager::getBuildingLocation(const Building & b)
 		{
 			// set the building padding specifically
 			int distance = 1;
+			// to let marines (size 1) & vultures (size 2) through.
 			if (b.type == BWAPI::UnitTypes::Terran_Missile_Turret)
-				distance = 0;
+				distance = 2;
 			else if (b.type == BWAPI::UnitTypes::Terran_Bunker)
-				// to let marines through
-				distance = 1;
+				distance = 2;
 
 			// whether or not we want the distance to be horizontal only
             bool horizontalOnly = b.type == BWAPI::UnitTypes::Protoss_Citadel_of_Adun ? true : false;
 
 			// set the location with priority on positions in our own region, unless bunker.
-			if (b.type.getID() == BWAPI::UnitTypes::Terran_Bunker)
+			if (b.type == BWAPI::UnitTypes::Terran_Bunker)
 			{
 				BWAPI::TilePosition position = BWAPI::TilePositions::None;
 
@@ -211,7 +211,7 @@ BWAPI::TilePosition BuildingManager::getBuildingLocation(const Building & b)
 
 				testLocation = position;
 			}
-			else if (b.type.getID() == BWAPI::UnitTypes::Terran_Missile_Turret)
+			else if (b.type == BWAPI::UnitTypes::Terran_Missile_Turret)
 			{
 				BWAPI::TilePosition choke = MapTools::Instance().getClosestChokepoint(BWAPI::Broodwar->self()->getStartLocation());
 				// place the turret near the chokepoint on the right side.
