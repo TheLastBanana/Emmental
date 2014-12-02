@@ -29,6 +29,8 @@ BuildOrderGoalItem::BuildOrderGoalItem(const MetaType & metaType, int count, int
 
 bool BuildOrderGoalManager::isCompleted(const BuildOrderGoalItem & bogi, const BuildOrder & buildOrder)
 {
+	if (bogi.count == 0) return true;
+
 	int count = 0;
 	BOOST_FOREACH(const ToBuild & toBuild, buildOrder)
 	{
@@ -89,12 +91,6 @@ BuildOrderGoalManager::BuildOrderGoalManager(const BOGIVector & items)
 {
 	BOOST_FOREACH(const BuildOrderGoalItem & item, items)
 	{
-		// don't bother queueing if it's done
-		if (isCompleted(item, BuildOrder()))
-		{
-			continue;
-		}
-
 		// see if an item with this priority already exists
 		int existingIndex = -1;
 		for (int i(0); i < (int)goals.size(); ++i)
@@ -131,9 +127,10 @@ void BuildOrderGoalManager::getBuildOrder(BuildOrder & buildOrder)
 	int supplyProvided = supplyType.supplyProvided();
 
 	// Determine future supply
+	int supplyUsed = BWAPI::Broodwar->self()->supplyUsed();
 	int supplyRemaining = BWAPI::Broodwar->self()->completedUnitCount(supplyType);
 	supplyRemaining += BuildingManager::Instance().buildingCount(supplyType);
-	supplyRemaining = supplyRemaining * supplyProvided - BWAPI::Broodwar->self()->supplyUsed();
+	supplyRemaining = supplyRemaining * supplyProvided - supplyUsed;
 
 	BOOST_FOREACH(BuildOrderGoal & bog, goals)
 	{
@@ -145,13 +142,20 @@ void BuildOrderGoalManager::getBuildOrder(BuildOrder & buildOrder)
 
 			BOOST_FOREACH(BuildOrderGoalItem & bogi, bog.items)
 			{
+				// don't queue beyond max supply
+				if (bogi.metaType.isUnit() && supplyUsed + bogi.metaType.unitType.supplyRequired() > 400)
+				{
+					continue;
+				}
+
 				// this item hasn't been completed, so add one to the build order
 				if (!isCompleted(bogi, buildOrder))
 				{
 					buildOrder.push_back(std::pair<MetaType, bool>(bogi.metaType, bogi.blocking));
 
-					// decrease projected supply amount
+					// account for projected supply amount
 					supplyRemaining -= bogi.metaType.supplyRequired();
+					supplyUsed += bogi.metaType.supplyRequired();
 
 					// build more supply providers
 					if (supplyRemaining < supplyProvided)
@@ -161,6 +165,11 @@ void BuildOrderGoalManager::getBuildOrder(BuildOrder & buildOrder)
 					}
 
 					complete = false;
+				}
+				else
+				{
+					// mark as complete
+					bogi.count = 0;
 				}
 			}
 		}
