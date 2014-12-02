@@ -493,7 +493,7 @@ BWAPI::Unit * ProductionManager::selectUnitOfType(BWAPI::UnitType type, bool lea
 
 		BOOST_FOREACH (BWAPI::Unit * u, BWAPI::Broodwar->self()->getUnits()) {
 
-			if (u->getType() == type && u->isCompleted() && !u->isTraining() && !u->isLifted() &&!u->isUnpowered()) {
+			if (u->getType() == type && u->isCompleted() && !u->isTraining() && !u->isLifted() &&!u->isUnpowered() && !u->isResearching() && !u->isUpgrading()) {
 
 				return u;
 			}
@@ -503,7 +503,7 @@ BWAPI::Unit * ProductionManager::selectUnitOfType(BWAPI::UnitType type, bool lea
 
 		BOOST_FOREACH(BWAPI::Unit * u, BWAPI::Broodwar->self()->getUnits()) 
 		{
-			if (u->getType() == type && u->isCompleted() && u->getHitPoints() > 0 && !u->isLifted() &&!u->isUnpowered()) 
+			if (u->getType() == type && u->isCompleted() && u->getHitPoints() > 0 && !u->isLifted() && !u->isUnpowered() && !u->isResearching() && !u->isUpgrading())
 			{
 				return u;
 			}
