@@ -42,7 +42,7 @@ void VultureManager::executeMicro(const UnitVector & targets)
 		UnitVector effectiveTargets(rangedUnitTargets);
 		// Deal with stealth units on a unit by unit basis
 		BOOST_FOREACH(BWAPI::Unit * stealthEnemy, stealthTargets) {
-			if (rangedUnit->getDistance(stealthEnemy) <= rangedUnit->getType().sightRange()) {
+			if (rangedUnit->getDistance(stealthEnemy) <= stealthEnemy->getType().sightRange()) {
 				effectiveTargets.push_back(stealthEnemy);
 			}
 		}
