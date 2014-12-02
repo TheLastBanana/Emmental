@@ -15,8 +15,10 @@ void VultureManager::executeMicro(const UnitVector & targets)
 			continue;
 		}
 
+		bool weCanHit = !targets[i]->getType().isFlyer();
+
 		// conditions for targeting
-		if (targets[i]->isVisible())
+		if (targets[i]->isVisible() && weCanHit)
 		{
 			rangedUnitTargets.push_back(targets[i]);
 		}
