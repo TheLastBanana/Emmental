@@ -183,10 +183,8 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 			speed *= 1.5;
 	}
 	
-	// don't kite buildings with Wraiths because it kind of sucks
-	if (target->getType().isBuilding() &&
-		target->getType() != BWAPI::UnitTypes::Terran_Bunker &&
-		rangedUnit->getType() == BWAPI::UnitTypes::Terran_Wraith)
+	// don't kite buildings
+	if (target->getType().isBuilding() && target->getType() != BWAPI::UnitTypes::Terran_Bunker)
 	{
 		kite = false;
 	}
