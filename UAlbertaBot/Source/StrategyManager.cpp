@@ -696,7 +696,7 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	int numFac = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Factory);
 	int numStar = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Starport);
 	int numWraith = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Wraith);
-	int wraithWanted = numWraith + 2*numStar;
+	int wraithWanted = numWraith + 1*numStar;
 	static int wantSpidermine = 1; //Used to stop duplicate spidermines
 	static int wantIonThrusters = 1; //just in case
 	// Build SCV
@@ -751,7 +751,7 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 
 
 	// build bunkers
-	if ((BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Barracks) > 0) && (numSCV > 11)) {
+	if ((BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Barracks) > 0) && (numSCV > 7)) {
 		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Bunker, 1, 6, false));
 	}
 
@@ -804,7 +804,7 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 
 	//expand when secure
 	if ((((numCC == 1) && (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Bunker) > 0)) 
-		&& ((numVultures >= 5 || (BWAPI::Broodwar->getFrameCount() > 9000)))) || BWAPI::Broodwar->getFrameCount() > 12000)
+		&& ((numVultures >= 5 || (BWAPI::Broodwar->getFrameCount() > 9000)))))
 	{
 		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Command_Center, numCC + 1, 10, false));
 	}
