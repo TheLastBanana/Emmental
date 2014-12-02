@@ -37,14 +37,12 @@ void VultureManager::executeMicro(const UnitVector & targets)
 	// for each zealot
 	BOOST_FOREACH(BWAPI::Unit * rangedUnit, rangedUnits)
 	{
+		UnitVector effectiveTargets(rangedUnitTargets);
 		// Deal with stealth units on a unit by unit basis
-		if (BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Spider_Mines) &&
-			rangedUnit->getSpiderMineCount() > 0) {
-				BOOST_FOREACH(BWAPI::Unit * stealthEnemy, stealthTargets) {
-					if (rangedUnit->getDistance(stealthEnemy) <= rangedUnit->getType().sightRange()) {
-						rangedUnitTargets.push_back(stealthEnemy);
-					}
-				}
+		BOOST_FOREACH(BWAPI::Unit * stealthEnemy, stealthTargets) {
+			if (rangedUnit->getDistance(stealthEnemy) <= rangedUnit->getType().sightRange()) {
+				effectiveTargets.push_back(stealthEnemy);
+			}
 		}
 
 		if (rangedUnit->getOrder() == BWAPI::Orders::VultureMine || rangedUnit->getOrder() == BWAPI::Orders::PlaceMine)
@@ -56,13 +54,13 @@ void VultureManager::executeMicro(const UnitVector & targets)
 		if (order.type == order.Attack || order.type == order.Defend || order.type == order.Harass) {
 
 			// if there are targets
-			if (!rangedUnitTargets.empty())
+			if (!effectiveTargets.empty())
 			{
 				// find the best target for this zealot
-				BWAPI::Unit * target = getTarget(rangedUnit, rangedUnitTargets);
+				BWAPI::Unit * target = getTarget(rangedUnit, effectiveTargets);
 
 				// attack it
-				kiteTarget(rangedUnit, rangedUnitTargets, target);
+				kiteTarget(rangedUnit, effectiveTargets, target);
 			}
 			// if there are no targets
 			else

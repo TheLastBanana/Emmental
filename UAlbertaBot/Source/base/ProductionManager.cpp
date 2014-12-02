@@ -114,15 +114,32 @@ void ProductionManager::update()
 	}
 
 	// detect producer deadlock once per second
-	if (queue.size() > 0)
+	if (queue.size() > 0 && (BWAPI::Broodwar->getFrameCount() % 24 == 0))
 	{
-		BWAPI::UnitType producer = queue.getHighestPriorityItem().metaType.whatBuilds();
-		if (producer != BWAPI::UnitTypes::None &&
-			(BWAPI::Broodwar->getFrameCount() % 24 == 0) &&
-			BWAPI::Broodwar->self()->allUnitCount(producer) == 0)
-		{
-			BWAPI::Broodwar->printf("Producer deadlock detected, new search!");
-			performBuildOrderSearch(StrategyManager::Instance().getBuildOrderGoal());
+		BuildOrderItem<PRIORITY_TYPE> firstItem = queue.getHighestPriorityItem();
+
+		// something is blocking
+		if (firstItem.blocking || queue.size() == 1) {
+			BWAPI::UnitType producer = firstItem.metaType.whatBuilds();
+			if (producer != BWAPI::UnitTypes::None &&
+				BWAPI::Broodwar->self()->allUnitCount(producer) == 0)
+			{
+				BWAPI::Broodwar->printf("Producer deadlock detected, new search!");
+				performBuildOrderSearch(StrategyManager::Instance().getBuildOrderGoal());
+			}
+
+			// research/upgrades may take a long time
+			MetaType firstType = firstItem.metaType;
+			if (firstType.isTech() || firstType.isUpgrade())
+			{
+				// check if there's anything free to research this
+				BWAPI::Unit * producer = selectUnitOfType(firstType.whatBuilds());
+				if (!producer || !canMakeNow(producer, firstType))
+				{
+					BWAPI::Broodwar->printf("Waiting on a tech for a long time, new search!");
+					performBuildOrderSearch(StrategyManager::Instance().getBuildOrderGoal());
+				}
+			}
 		}
 	}
 
@@ -253,7 +270,21 @@ bool ProductionManager::canMakeNow(BWAPI::Unit * producer, MetaType t)
 	{
 		if (t.isUnit())
 		{
-			canMake = BWAPI::Broodwar->canMake(producer, t.unitType);
+			if (t.unitType.isAddon())
+			{
+				if (!producer)
+				{
+					canMake = false;
+				}
+				else
+				{
+					canMake = BWAPI::Broodwar->canMake(producer, t.unitType) && !producer->isTraining() && !producer->isResearching() && !producer->isUpgrading();
+				}
+			}
+			else
+			{
+				canMake = BWAPI::Broodwar->canMake(producer, t.unitType);
+			}
 		}
 		else if (t.isTech())
 		{
@@ -476,7 +507,7 @@ BWAPI::Unit * ProductionManager::selectUnitOfType(BWAPI::UnitType type, bool lea
 
 		BOOST_FOREACH (BWAPI::Unit * u, BWAPI::Broodwar->self()->getUnits()) {
 
-			if (u->getType() == type && u->isCompleted() && !u->isTraining() && !u->isLifted() &&!u->isUnpowered()) {
+			if (u->getType() == type && u->isCompleted() && !u->isTraining() && !u->isLifted() &&!u->isUnpowered() && !u->isResearching() && !u->isUpgrading()) {
 
 				return u;
 			}
@@ -486,7 +517,7 @@ BWAPI::Unit * ProductionManager::selectUnitOfType(BWAPI::UnitType type, bool lea
 
 		BOOST_FOREACH(BWAPI::Unit * u, BWAPI::Broodwar->self()->getUnits()) 
 		{
-			if (u->getType() == type && u->isCompleted() && u->getHitPoints() > 0 && !u->isLifted() &&!u->isUnpowered()) 
+			if (u->getType() == type && u->isCompleted() && u->getHitPoints() > 0 && !u->isLifted() && !u->isUnpowered() && !u->isResearching() && !u->isUpgrading())
 			{
 				return u;
 			}
