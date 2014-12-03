@@ -86,35 +86,36 @@ namespace BuildOrderSearch
 			else if (r == BWAPI::Races::Terran)
 			{
 				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_SCV, actions.size()));				// 0
-				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Supply_Depot, actions.size()));		// 1
-				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Command_Center, actions.size()));	// 2
-				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Barracks, actions.size()));			// 3
-				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Refinery, actions.size()));			// 4
-				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Marine, actions.size()));			// 5
-				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Academy, actions.size()));			// 6
-				actions.push_back(StarcraftAction(BWAPI::TechTypes::Stim_Packs, actions.size()));				// 7
-				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Medic, actions.size()));				// 8
-				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Factory, actions.size()));			// 9
-				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Vulture, actions.size()));			// 10
-				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Starport, actions.size()));			// 11
-				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Wraith, actions.size()));			// 12
-				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Machine_Shop, actions.size()));		// 13
-				actions.push_back(StarcraftAction(BWAPI::UpgradeTypes::Ion_Thrusters, actions.size()));			// 14
-				actions.push_back(StarcraftAction(BWAPI::TechTypes::Spider_Mines, actions.size()));				// 15
-				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Bunker, actions.size()));			// 16
-				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Engineering_Bay, actions.size()));	// 17
-				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Missile_Turret, actions.size()));	// 18
-				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Armory, actions.size()));			// 19
-				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Comsat_Station, actions.size()));	// 20
-				actions.push_back(StarcraftAction(BWAPI::UpgradeTypes::Terran_Vehicle_Plating, actions.size()));// 21
-				actions.push_back(StarcraftAction(BWAPI::UpgradeTypes::Terran_Vehicle_Weapons, actions.size()));// 22
-				actions.push_back(StarcraftAction(BWAPI::UpgradeTypes::Terran_Ship_Plating, actions.size()));   // 23
-				actions.push_back(StarcraftAction(BWAPI::UpgradeTypes::Terran_Ship_Weapons, actions.size()));   // 24
-				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Science_Facility, actions.size()));  // 25
-				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Control_Tower, actions.size()));     // 26
-				actions.push_back(StarcraftAction(BWAPI::TechTypes::Cloaking_Field, actions.size()));           // 27
-				actions.push_back(StarcraftAction(BWAPI::UpgradeTypes::Apollo_Reactor, actions.size()));        // 28
-
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Supply_Depot, actions.size()));			// 1
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Command_Center, actions.size()));		// 2
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Barracks, actions.size()));				// 3
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Refinery, actions.size()));				// 4
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Marine, actions.size()));				// 5
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Academy, actions.size()));				// 6
+				actions.push_back(StarcraftAction(BWAPI::TechTypes::Stim_Packs, actions.size()));					// 7
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Medic, actions.size()));					// 8
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Factory, actions.size()));				// 9
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Vulture, actions.size()));				// 10
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Starport, actions.size()));				// 11
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Wraith, actions.size()));				// 12
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Machine_Shop, actions.size()));			// 13
+				actions.push_back(StarcraftAction(BWAPI::UpgradeTypes::Ion_Thrusters, actions.size()));				// 14
+				actions.push_back(StarcraftAction(BWAPI::TechTypes::Spider_Mines, actions.size()));					// 15
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Bunker, actions.size()));				// 16
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Engineering_Bay, actions.size()));		// 17
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Missile_Turret, actions.size()));		// 18
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Armory, actions.size()));				// 19
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Comsat_Station, actions.size()));		// 20
+				actions.push_back(StarcraftAction(BWAPI::UpgradeTypes::Terran_Vehicle_Plating, actions.size()));	// 21
+				actions.push_back(StarcraftAction(BWAPI::UpgradeTypes::Terran_Vehicle_Weapons, actions.size()));	// 22
+				actions.push_back(StarcraftAction(BWAPI::UpgradeTypes::Terran_Ship_Plating, actions.size()));		// 23
+				actions.push_back(StarcraftAction(BWAPI::UpgradeTypes::Terran_Ship_Weapons, actions.size()));		// 24
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Science_Facility, actions.size()));		// 25
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Control_Tower, actions.size()));			// 26
+				actions.push_back(StarcraftAction(BWAPI::TechTypes::Cloaking_Field, actions.size()));				// 27
+				actions.push_back(StarcraftAction(BWAPI::UpgradeTypes::Apollo_Reactor, actions.size()));			// 28
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode, actions.size()));	// 29
+				actions.push_back(StarcraftAction(BWAPI::TechTypes::Tank_Siege_Mode, actions.size()));				// 30
 
 			}
 			else if (r == BWAPI::Races::Zerg)
