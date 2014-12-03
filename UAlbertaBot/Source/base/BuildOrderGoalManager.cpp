@@ -44,6 +44,12 @@ bool BuildOrderGoalManager::isCompleted(const BuildOrderGoalItem & bogi, const B
 	{
 		count += BWAPI::Broodwar->self()->allUnitCount(bogi.metaType.unitType);
 
+		// tanks can be multiple types
+		if (bogi.metaType.unitType == BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode)
+		{
+			count += BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode);
+		}
+
 		// we definitely have enough units
 		if (count >= bogi.count) return true;
 
