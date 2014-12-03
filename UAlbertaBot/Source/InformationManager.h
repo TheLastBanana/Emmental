@@ -23,6 +23,8 @@ class InformationManager {
 	BWTA::BaseLocation *				mainBaseLocations[2];
 	std::set<BWTA::Region *>			occupiedRegions[2];
 
+	std::set<BWAPI::Unit *>				comsatSet;
+
 	int									getIndex(BWAPI::Player * player);
 
 	void								updateUnit(BWAPI::Unit * unit);
@@ -39,6 +41,8 @@ class InformationManager {
 
 public:
 
+	const std::set<BWAPI::Unit *> getComsatSet() const;
+
 	bool goForIt;
 	int lastFrameRegroup;
 
@@ -51,7 +55,7 @@ public:
 	// event driven stuff
 	void					onUnitShow(BWAPI::Unit * unit)			{ updateUnit(unit); }
 	void					onUnitHide(BWAPI::Unit * unit)			{ updateUnit(unit); }
-	void					onUnitCreate(BWAPI::Unit * unit)		{ updateUnit(unit); }
+	void					onUnitCreate(BWAPI::Unit * unit);
 	void					onUnitMorph(BWAPI::Unit * unit)			{ updateUnit(unit); }
 	void					onUnitRenegade(BWAPI::Unit * unit)		{ updateUnit(unit); }
 	void					onUnitDestroy(BWAPI::Unit * unit);
