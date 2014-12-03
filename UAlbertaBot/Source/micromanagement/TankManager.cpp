@@ -9,10 +9,7 @@ void TankManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & target
 	{
 		smartAttackUnit(rangedUnit, target);
 	}
-	else if (order.type != order.Defend)
-	{
-		smartAttackMove(rangedUnit, target->getPosition());
-	}
+	smartAttackMove(rangedUnit, target->getPosition());
 }
 
 void TankManager::executeMicro(const UnitVector & targets)
