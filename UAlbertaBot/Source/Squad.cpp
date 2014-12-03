@@ -84,6 +84,8 @@ void Squad::update()
 
 		meleeManager.execute(order);
 	}
+
+	tankManager.execute(order);
 }
 
 void Squad::updateUnits()
@@ -141,6 +143,7 @@ void Squad::setManagerUnits()
 	UnitVector bunkerUnits;
 	UnitVector vultures;
 	UnitVector wraiths;
+	UnitVector tanks;
 	UnitVector melee;
 
 	// add units to micro managers
@@ -163,6 +166,11 @@ void Squad::setManagerUnits()
 			{
 				wraiths.push_back(unit);
 			}
+			// select tanks
+			else if (unit->getType() == BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode || unit->getType() == BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode)
+			{
+				tanks.push_back(unit);
+			}
 			else if (unit->getType() == BWAPI::UnitTypes::Terran_SCV) {
 				melee.push_back(unit);
 			} 
@@ -173,6 +181,7 @@ void Squad::setManagerUnits()
 	}
 
 	vultureManager.setUnits(vultures);
+	tankManager.setUnits(tanks);
 	rangedManager.setUnits(wraiths);
 	meleeManager.setUnits(melee);
 	BunkerManager::Instance().setUnits(bunkerUnits);

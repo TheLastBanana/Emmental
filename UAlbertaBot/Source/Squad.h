@@ -3,6 +3,7 @@
 #include "Common.h"
 #include "micromanagement/RangedManager.h"
 #include "micromanagement/VultureManager.h"
+#include "micromanagement/TankManager.h"
 #include "micromanagement/MeleeManager.h"
 #include "SquadOrder.h"
 #include "DistanceMap.hpp"
@@ -15,6 +16,7 @@
 class MeleeManager;
 class RangedManager;
 class VultureManager;
+class TankManager;
 
 class Squad
 {
@@ -27,6 +29,7 @@ class Squad
 	RangedManager		rangedManager;
 	VultureManager		vultureManager;
 	MeleeManager		meleeManager;
+	TankManager			tankManager;
 
 	std::map<BWAPI::Unit *, bool>	nearEnemy;
 

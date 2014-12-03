@@ -144,6 +144,39 @@ void CombatCommander::assignDefenseSquads(std::set<BWAPI::Unit *> & unitsToAssig
 {
 	if (unitsToAssign.empty()) { return; }
 
+	bool foundTankPos = false;
+	BWAPI::Position tankPosition;
+
+	// get bunker region
+	BOOST_FOREACH(BWAPI::Unit * u, BWAPI::Broodwar->self()->getUnits())
+	{
+		if (u->getType() == BWAPI::UnitTypes::Terran_Bunker)
+		{
+			tankPosition = u->getPosition();
+			foundTankPos = true;
+			break;
+		}
+	}
+
+	if (foundTankPos)
+	{
+		UnitVector tanks;
+		// assign all tanks
+		BOOST_FOREACH(BWAPI::Unit * u, unitsToAssign)
+		{
+			if (u->getType() == BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode ||
+				u->getType() == BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode)
+			{
+				tanks.push_back(u);
+			}
+		}
+		BOOST_FOREACH(BWAPI::Unit * u, tanks)
+		{
+			unitsToAssign.erase(u);
+		}
+		squadData.addSquad(Squad(tanks, SquadOrder(SquadOrder::Defend, tankPosition, 1000, "Defend Bunker")));
+	}
+
 	// for each of our occupied regions
 	BOOST_FOREACH(BWTA::Region * myRegion, InformationManager::Instance().getOccupiedRegions(BWAPI::Broodwar->self()))
 	{
