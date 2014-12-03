@@ -349,7 +349,9 @@ bool InformationManager::isCombatUnit(BWAPI::UnitType type) const
 	}
 
 	// check for various types of combat units
-	if (type.canAttack() || type == BWAPI::UnitTypes::Terran_Medic)
+	//Added Protoss high templar, reaver, carrier (units that can't attack directly but still attack)
+	if (type.canAttack() || type == BWAPI::UnitTypes::Terran_Medic || type == BWAPI::UnitTypes::Protoss_High_Templar || 
+		type == BWAPI::UnitTypes:: Protoss_Carrier || type == BWAPI::UnitTypes::Protoss_Reaver)
 	{
 		return true;
 	}
@@ -440,6 +442,7 @@ const UnitData & InformationManager::getUnitData(BWAPI::Unit * unit) const
 bool InformationManager::enemyHasCloakedUnits()
 {
 	return enemyUnitData.hasCloakedUnits();
+	//Probably should check for burrowed.
 }
 
 bool InformationManager::enemyHasDetector()
