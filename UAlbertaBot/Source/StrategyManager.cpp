@@ -698,13 +698,15 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	int numFac = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Factory);
 	int numStar = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Starport);
 	int numWraith = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Wraith);
+	int numTanks = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode) +
+		BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode);
 	int tanksWanted = 1;
-	if (numFac > 1) tanksWanted = 3;
+	if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Machine_Shop > 1)) tanksWanted = 3;
 	if (numFac >= 3) tanksWanted = 6;
 	int wraithWanted = numWraith + 1*numStar;
 	// Build SCV
 	int numSCV = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_SCV);
-	int scvWanted = numSCV + 2 * (numCC);
+	int scvWanted = numSCV + 3 * (numCC);
 	if (scvWanted > (numCC)* 24)
 	{
 		scvWanted = (numCC)* 24;
@@ -737,8 +739,8 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	//we should always be building them before the vultures.
 	int numVultures = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Vulture);
 	int vulturesWanted = numVultures + 2*numFac;
-	if (numVultures > 2) factoriesWanted = 2;
-	if (numVultures > 6) factoriesWanted = 3;
+	if (numVultures > 1) factoriesWanted = 2;
+	if (numVultures > 3) factoriesWanted = 3;
 	if (numCC > 1) factoriesWanted = 4;
 	if (numFac == 4) factoriesWanted = 5;
 	if (numCC > 2)
@@ -751,7 +753,7 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 		+ InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode, BWAPI::Broodwar->enemy())
 		+ InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Terran_Wraith, BWAPI::Broodwar->enemy())
 		+ InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Protoss_Scout, BWAPI::Broodwar->enemy())
-		+ InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Protoss_Carrier, BWAPI::Broodwar->enemy())
+		+ (InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Protoss_Carrier, BWAPI::Broodwar->enemy())*2)
 		+ InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Zerg_Mutalisk, BWAPI::Broodwar->enemy()));
 
 	if (wraithPriority >= 5) {
@@ -843,7 +845,7 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 
 	//expand when secure
 	if ((numCC == 1) 
-		&& (numVultures > 5)) //add bunker requirement and lower vulture requirement
+		&& (numVultures > 5) && (numTanks > 2)) //add bunker requirement and lower vulture requirement
 	{
 		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Command_Center, numCC + 1, 10, false));
 	}
@@ -858,7 +860,7 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Command_Center, numCC + 1, 10, false));
 	}
 
-	if (BWAPI::Broodwar->getFrameCount() > 17500)
+	if (BWAPI::Broodwar->getFrameCount() > 20000)
 	{
 		if (numCC < 5) {
 			goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Command_Center, numCC + 1, 10, false));
