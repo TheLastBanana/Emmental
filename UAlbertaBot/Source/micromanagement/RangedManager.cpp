@@ -181,7 +181,7 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 
 	// determine whether the target can be kited
 	if (range <= getEffectiveRange(rangedUnit, target) && !(vultureWithMine && shouldMineTarget))
-	{\
+	{
 		// if we can't kite it, there's no point
 		smartAttackUnit(rangedUnit, target);
 		return;
@@ -242,7 +242,6 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 			double2 toRangedUnit(target->getPosition() - rangedUnit->getPosition());
 			toRangedUnit.normalise();
 			toRangedUnit = toRangedUnit * dropDistance; // Make it longer!
-			BWAPI::Broodwar->printf("vector len: %f, x: %f, y: %f", toRangedUnit.len(), toRangedUnit.x, toRangedUnit.y);
 
 			// Move there
 			rangedUnit->move(target->getPosition() + toRangedUnit);
@@ -251,8 +250,8 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 		else if (canDrop && closeToTarget) {
 			bool dropSuccess = rangedUnit->useTech(BWAPI::TechTypes::Spider_Mines, rangedUnit->getPosition());
 			kite = false; // If we're trying to drop a mine, don't kite
-			BWAPI::Broodwar->printf("Mining against %s",
-				target->getType().c_str());
+			//BWAPI::Broodwar->printf("Mining against %s",
+			//	target->getType().c_str());
 		}
 	}
 

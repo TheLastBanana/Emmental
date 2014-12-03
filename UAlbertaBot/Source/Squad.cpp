@@ -39,7 +39,14 @@ void Squad::update()
 		BWAPI::Broodwar->drawCircleMap(regroupPosition.x(), regroupPosition.y(), 30, BWAPI::Colors::Purple, true);
 
 		vultureManager.regroup(regroupPosition);
-		tankManager.regroup(regroupPosition);
+		if (order.type == order.Attack)
+		{
+			tankManager.regroup(regroupPosition);
+		}
+		else
+		{
+			tankManager.execute(order);
+		}
 	}
 	else // otherwise, execute micro
 	{
@@ -193,7 +200,7 @@ bool Squad::needsToRegroup(const UnitVector & u)
 	// if we are not attacking, never regroup
 	if (u.empty() || !(order.type == SquadOrder::Attack || order.type == SquadOrder::Harass))
 	{
-		regroupStatus = std::string("\x04 No combat units available");
+		//regroupStatus = std::string("\x04 No combat units available");
 		return false;
 	}
 
@@ -211,7 +218,7 @@ bool Squad::needsToRegroup(const UnitVector & u)
 		StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossDarkTemplar &&
 		(BWAPI::Broodwar->self()->deadUnitCount(BWAPI::UnitTypes::Protoss_Dark_Templar) == 0))
 	{
-		regroupStatus = std::string("\x04 BLUE CHEESE HOOOOO!");
+		//regroupStatus = std::string("\x04 BLUE CHEESE HOOOOO!");
 		return false;
 	}
 
@@ -219,7 +226,7 @@ bool Squad::needsToRegroup(const UnitVector & u)
 
 	if (!unitClosest)
 	{
-		regroupStatus = std::string("\x04 No closest unit");
+		//regroupStatus = std::string("\x04 No closest unit");
 		return false;
 	}
 
@@ -249,11 +256,11 @@ bool Squad::needsToRegroup(const UnitVector & u)
 	
 	if (retreat)
 	{
-		regroupStatus = std::string("\x04 Retreat - simulation predicts defeat");
+		//regroupStatus = std::string("\x04 Retreat - simulation predicts defeat");
 	}
 	else
 	{
-		regroupStatus = std::string("\x04 Attack - simulation predicts success");
+		//regroupStatus = std::string("\x04 Attack - simulation predicts success");
 	}
 
 	return retreat;

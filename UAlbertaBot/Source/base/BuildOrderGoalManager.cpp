@@ -130,13 +130,15 @@ void BuildOrderGoalManager::getBuildOrder(BuildOrder & buildOrder)
 {
 	// Determine supply provider
 	BWAPI::UnitType supplyType = BWAPI::Broodwar->self()->getRace().getSupplyProvider();
-	int supplyProvided = supplyType.supplyProvided();
+	int supplyPerProvider = supplyType.supplyProvided();
 
 	// Determine future supply
+	int supplyRemaining = BWAPI::Broodwar->self()->supplyTotal();
+	supplyRemaining += BuildingManager::Instance().buildingCount(supplyType) * supplyPerProvider;
+	supplyRemaining += BuildingManager::Instance().buildingCount(BWAPI::UnitTypes::Terran_Command_Center) * BWAPI::UnitTypes::Terran_Command_Center.supplyProvided();
+
 	int supplyUsed = BWAPI::Broodwar->self()->supplyUsed();
-	int supplyRemaining = BWAPI::Broodwar->self()->completedUnitCount(supplyType);
-	supplyRemaining += BuildingManager::Instance().buildingCount(supplyType);
-	supplyRemaining = supplyRemaining * supplyProvided - supplyUsed;
+	supplyRemaining -= supplyUsed;
 
 	BOOST_FOREACH(BuildOrderGoal & bog, goals)
 	{
@@ -161,13 +163,14 @@ void BuildOrderGoalManager::getBuildOrder(BuildOrder & buildOrder)
 
 					// account for projected supply amount
 					supplyRemaining -= bogi.metaType.supplyRequired();
+					if (bogi.metaType.isUnit()) supplyRemaining += bogi.metaType.unitType.supplyProvided();
 					supplyUsed += bogi.metaType.supplyRequired();
 
 					// build more supply providers
-					if (supplyRemaining < supplyProvided)
+					if (supplyRemaining < supplyPerProvider)
 					{
 						buildOrder.push_back(std::pair<MetaType, bool>(supplyType, false));
-						supplyRemaining += supplyProvided;
+						supplyRemaining += supplyPerProvider;
 					}
 
 					complete = false;
