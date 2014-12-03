@@ -145,37 +145,48 @@ void CombatCommander::assignDefenseSquads(std::set<BWAPI::Unit *> & unitsToAssig
 	if (unitsToAssign.empty()) { return; }
 
 	bool foundTankPos = false;
-	BWAPI::Position tankPosition;
+	BWAPI::Position bunkerPosition;
 
-	// get bunker region
+	// get bunker position
 	BOOST_FOREACH(BWAPI::Unit * u, BWAPI::Broodwar->self()->getUnits())
 	{
 		if (u->getType() == BWAPI::UnitTypes::Terran_Bunker)
 		{
-			tankPosition = u->getPosition();
+			bunkerPosition = u->getPosition();
 			foundTankPos = true;
 			break;
 		}
 	}
 
+	// move toward the main base
+	double2 basePos(InformationManager::Instance().getMainBaseLocation(BWAPI::Broodwar->self())->getPosition());
+	double2 offset(basePos - bunkerPosition);
+	offset.normalise();
+
+	BWAPI::Position tankPosition = BWAPI::Position(bunkerPosition + offset * 100);
+
 	if (foundTankPos)
 	{
-		UnitVector tanks;
-		// assign 2 tanks to defend the bunker
-		BOOST_FOREACH(BWAPI::Unit * u, unitsToAssign)
+		UnitVector defenseTanks;
+
+		// sort by length (we want the oldest tanks so we don't swap them out)
+		UnitVector sortedToAssign;
+		std::copy(unitsToAssign.begin(), unitsToAssign.end(), std::back_inserter(sortedToAssign));
+		std::sort(sortedToAssign.begin(), sortedToAssign.end(), lowerID);
+
+		// assign the 2 oldest tanks
+		BOOST_FOREACH(BWAPI::Unit * u, sortedToAssign)
 		{
 			if (u->getType() == BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode ||
 				u->getType() == BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode)
 			{
-				tanks.push_back(u);
-				if (tanks.size() >= 2) break;
+				defenseTanks.push_back(u);
+				unitsToAssign.erase(u);
+
+				if (defenseTanks.size() >= 2) break;
 			}
 		}
-		BOOST_FOREACH(BWAPI::Unit * u, tanks)
-		{
-			unitsToAssign.erase(u);
-		}
-		squadData.addSquad(Squad(tanks, SquadOrder(SquadOrder::Defend, tankPosition, 1000, "Defend Bunker")));
+		squadData.addSquad(Squad(defenseTanks, SquadOrder(SquadOrder::Defend, tankPosition, 1000, "Defend Bunker")));
 	}
 
 	// for each of our occupied regions

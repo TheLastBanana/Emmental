@@ -9,7 +9,7 @@ void TankManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & target
 	{
 		smartAttackUnit(rangedUnit, target);
 	}
-	else
+	else if (order.type != order.Defend)
 	{
 		smartAttackMove(rangedUnit, target->getPosition());
 	}
@@ -38,86 +38,52 @@ void TankManager::executeMicro(const UnitVector & targets)
 	// for each zealot
 	BOOST_FOREACH(BWAPI::Unit * rangedUnit, rangedUnits)
 	{
-		// siege mode
-		if (BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Tank_Siege_Mode))
+		// if we're not near the order position
+		if (rangedUnit->getDistance(order.position) > 100)
 		{
-			bool toSiege = false;
-
-			// defend the bunker
-			if (order.type == order.Defend)
+			// if there are targets, siege
+			if (!rangedUnitTargets.empty())
 			{
-				BWAPI::Unit * bunker = NULL;
-
-				// find the bunker
-				BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->self()->getUnits())
-				{
-					if (unit->getType() == BWAPI::UnitTypes::Terran_Bunker)
-					{
-						bunker = unit;
-						break;
-					}
-				}
-
-				// near bunker
-				if (bunker && rangedUnit->getPosition().getApproxDistance(bunker->getPosition()) < 150 &&
-					!rangedUnit->isMoving())
-				{
-					toSiege = true;
-				}
-			}
-			else
-			{
-				BOOST_FOREACH(const BWAPI::Unit * target, targets)
+				bool toSiege = false;
+				BOOST_FOREACH(const BWAPI::Unit * target, rangedUnitTargets)
 				{
 					// siege if something is in siege range
-					if (rangedUnit->getDistance(target->getPosition()) <= BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange())
+					if (rangedUnit->getDistance(target->getPosition()) <= BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() &&
+						!rangedUnit->isSieged())
 					{
 						toSiege = true;
 						break;
 					}
 				}
-			}
 
-			// engage/disengage siege
-			if (toSiege && !rangedUnit->isSieged())
-			{
-				rangedUnit->siege();
-				continue;
+				if (toSiege && !rangedUnit->isSieged())
+				{
+					rangedUnit->siege();
+				}
+				else if (!toSiege && rangedUnit->isSieged())
+				{
+					rangedUnit->unsiege();
+				}
 			}
-			else if (!toSiege && rangedUnit->isSieged())
+			else
 			{
-				rangedUnit->unsiege();
-				continue;
+				// move to it
+				smartMove(rangedUnit, order.position);
 			}
 		}
-
-		// if the order is to attack or defend
-		if (order.type == order.Attack || order.type == order.Defend || order.type == order.Harass) {
-
-			// if there are targets
-			if (!rangedUnitTargets.empty())
+		else
+		{
+			if (!rangedUnit->isSieged())
+			{
+				rangedUnit->siege();
+			}
+			else if (!rangedUnitTargets.empty())
 			{
 				// find the best target for this zealot
 				BWAPI::Unit * target = getTarget(rangedUnit, rangedUnitTargets);
 
 				// attack it
 				kiteTarget(rangedUnit, rangedUnitTargets, target);
-			}
-			// if there are no targets
-			else
-			{
-				// if we're not near the order position
-				if (rangedUnit->getDistance(order.position) > 100)
-				{
-					// move to it
-					if (order.type == order.Harass)
-					{
-						smartMove(rangedUnit, order.position);
-					}
-					else {
-						smartAttackMove(rangedUnit, order.position);
-					}
-				}
 			}
 		}
 

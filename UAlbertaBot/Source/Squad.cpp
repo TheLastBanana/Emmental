@@ -39,7 +39,14 @@ void Squad::update()
 		BWAPI::Broodwar->drawCircleMap(regroupPosition.x(), regroupPosition.y(), 30, BWAPI::Colors::Purple, true);
 
 		vultureManager.regroup(regroupPosition);
-		tankManager.regroup(regroupPosition);
+		if (order.type == order.Attack)
+		{
+			tankManager.regroup(regroupPosition);
+		}
+		else
+		{
+			tankManager.execute(order);
+		}
 	}
 	else // otherwise, execute micro
 	{
