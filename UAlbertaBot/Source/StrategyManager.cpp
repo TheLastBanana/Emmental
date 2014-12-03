@@ -771,7 +771,7 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 
 	// build bunkers
 	if ((BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Barracks) > 0) && (numSCV > 7)) {
-		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Bunker, 1, 10, true));
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Bunker, 1, 6, false));
 	}
 
 	// train marines for bunkers
@@ -786,7 +786,7 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	if ((BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 0) &&
 		(numVultures > 0))
 	{
-		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Machine_Shop, BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory), 10, false));
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Machine_Shop, 1, 10, false));
 	}
 
 	// Make sure we have a machine shop
@@ -804,14 +804,6 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 		{
 			goal.push_back(BuildOrderGoalItem(BWAPI::TechTypes::Spider_Mines, 1, 10, false));
 		}
-		// Research siege mode
-		if (!BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Tank_Siege_Mode))
-		{
-			goal.push_back(BuildOrderGoalItem(BWAPI::TechTypes::Tank_Siege_Mode, 1, 11, false));
-		}
-
-		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode, 2, 10, false));
-		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode, 4, 5, false));
 	}
 
 	//build starport
