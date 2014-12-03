@@ -126,17 +126,18 @@ void CombatCommander::assignScoutDefenseSquads()
             // get our worker unit that is mining that is closest to it
             BWAPI::Unit * workerDefender    = WorkerManager::Instance().getClosestMineralWorkerTo(enemyWorker);
 
-            // grab it from the worker manager
-            WorkerManager::Instance().setCombatWorker(workerDefender);
-            
-            // put it into a unit vector
-            UnitVector workerDefenseForce;
-            workerDefenseForce.push_back(workerDefender);
+			if (workerDefender == NULL) {
+				// grab it from the worker manager
+				WorkerManager::Instance().setCombatWorker(workerDefender);
 
-            // make a squad using the worker to defend
-            squadData.addSquad(Squad(workerDefenseForce, SquadOrder(SquadOrder::Defend, regionCenter, 1000, "Get That Scout!")));
-			return;
-        }
+				// put it into a unit vector
+				UnitVector workerDefenseForce;
+				workerDefenseForce.push_back(workerDefender);
+
+				// make a squad using the worker to defend
+				squadData.addSquad(Squad(workerDefenseForce, SquadOrder(SquadOrder::Defend, regionCenter, 1000, "Get That Scout!")));
+			}
+		}
 	}
 }
 
