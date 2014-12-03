@@ -4,8 +4,15 @@
 // Get effective range of unit, taking into account the fact that it can move
 double getEffectiveRange(const BWAPI::Unit * ourUnit, const BWAPI::Unit * enemyUnit)
 {
+
 	double speedWeight = 1.5;
 	BWAPI::UnitType enemyType = enemyUnit->getType();
+
+	if (enemyType == BWAPI::UnitTypes::Zerg_Lurker && !enemyUnit->isBurrowed()) return 0;
+	if (enemyType == BWAPI::UnitTypes::Protoss_Dragoon &&
+		enemyUnit->getUpgradeLevel(BWAPI::UpgradeTypes::Singularity_Charge) >= 1)
+		return 6 * 32;
+
 	int maxRange = ourUnit->getType().isFlyer() ?
 				   enemyType.airWeapon().maxRange() :
 				   enemyType.groundWeapon().maxRange();
@@ -45,18 +52,8 @@ bool RangedManager::checkFleePosition(const BWAPI::Unit * rangedUnit, const Unit
 		}
 
 		// avoid spider mines
-		if (unit->getType() == BWAPI::UnitTypes::Terran_Vulture_Spider_Mine &&
-			(rangedUnit->getDistance(unit) < unit->getType().groundWeapon().outerSplashRadius()))
-		{
-			// determine if it can attack anyone
-			int enemiesInRange = 0;
-			BOOST_FOREACH(const BWAPI::Unit * inRange, unit->getUnitsInRadius(unit->getType().seekRange()))
-			{
-				if (unit->getPlayer() != BWAPI::Broodwar->self()) ++enemiesInRange;
-			}
-
-			if (enemiesInRange > 0) return false;
-		}
+		if (unit->getType() == BWAPI::UnitTypes::Terran_Vulture_Spider_Mine && !unit->isBurrowed())
+			return false;
 	}
 
 	return true;
@@ -163,10 +160,26 @@ void RangedManager::executeMicro(const UnitVector & targets)
 
 void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targets, BWAPI::Unit * target)
 {
-	double range(rangedUnit->getType().groundWeapon().maxRange());
+	// Range of our unit
+	int range(rangedUnit->getType().groundWeapon().maxRange());
+	
+	// Are we a vulture with a mine
+	bool vultureWithMine = rangedUnit->getType() == BWAPI::UnitTypes::Terran_Vulture &&
+		BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Spider_Mines) &&
+		rangedUnit->getSpiderMineCount();
+
+	// Is the target a mine objective
+	bool shouldMineTarget = (target->getType() == BWAPI::UnitTypes::Zerg_Lurker && target->isBurrowed()) ||
+		target->getType() == BWAPI::UnitTypes::Protoss_Dark_Templar ||
+		target->getType() == BWAPI::UnitTypes::Protoss_Dragoon;
+	
+	bool closeToTarget;
+	// An attempt to not check the distance every time (faster?)
+	if (shouldMineTarget) closeToTarget = rangedUnit->getDistance(target) < BWAPI::UnitTypes::Terran_Vulture_Spider_Mine.seekRange();
+
 	// determine whether the target can be kited
-	if (range <= getEffectiveRange(rangedUnit, target))
-	{
+	if (range <= getEffectiveRange(rangedUnit, target) && !(vultureWithMine && shouldMineTarget))
+	{\
 		// if we can't kite it, there's no point
 		smartAttackUnit(rangedUnit, target);
 		return;
@@ -204,22 +217,40 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 
 	// If the unit is a cloaking unit, we're a vulture, we've researched mines
 	// and we have mines left, try and drop a mine
-	if ((target->getType() == BWAPI::UnitTypes::Zerg_Lurker || target->getType() == BWAPI::UnitTypes::Protoss_Dark_Templar) &&
+	if (shouldMineTarget && // Defined at top of kiteTarget
 		rangedUnit->getType() == BWAPI::UnitTypes::Terran_Vulture &&
 		BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Spider_Mines) &&
 		rangedUnit->getSpiderMineCount() > 0)
 	{
+		// Tweaking parameters
+		int spreadRadius = BWAPI::UnitTypes::Terran_Vulture_Spider_Mine.seekRange() / 3;
+		int dropDistance = BWAPI::UnitTypes::Terran_Vulture_Spider_Mine.seekRange() / 2;
 		bool canDrop = true;
 		BOOST_FOREACH(BWAPI::Unit* u, BWAPI::Broodwar->self()->getUnits()) {
 			if (u->getType() != BWAPI::UnitTypes::Terran_Vulture_Spider_Mine) continue; // Only looking for mines
-			if (rangedUnit->getDistance(u) < 10) { // Gotta be at least 10 units away to drop a mine, ensures not spamdrop->lockup
+			
+			// Try and space mines out
+			if (rangedUnit->getDistance(u) < spreadRadius) {
 				canDrop = false;
 				break;
 			}
 		}
-		if (canDrop) {
+		if (!closeToTarget && canDrop) {
+			// Get the vector
+			double2 toRangedUnit(target->getPosition() - rangedUnit->getPosition());
+			toRangedUnit.normalise();
+			toRangedUnit = toRangedUnit * dropDistance; // Make it longer!
+			BWAPI::Broodwar->printf("vector len: %f, x: %f, y: %f", toRangedUnit.len(), toRangedUnit.x, toRangedUnit.y);
+
+			// Move there
+			rangedUnit->move(target->getPosition() + toRangedUnit);
+			kite = false;
+		}
+		else if (canDrop && closeToTarget) {
 			bool dropSuccess = rangedUnit->useTech(BWAPI::TechTypes::Spider_Mines, rangedUnit->getPosition());
 			kite = false; // If we're trying to drop a mine, don't kite
+			BWAPI::Broodwar->printf("Mining against %s",
+				target->getType().c_str());
 		}
 	}
 
@@ -356,12 +387,17 @@ int RangedManager::getAttackPriority(BWAPI::Unit * rangedUnit, BWAPI::Unit * tar
 	}
 	
 	// Target stealth highly if we're a vulture with mines
-	if (((target->getType() == BWAPI::UnitTypes::Zerg_Lurker && target->isCloaked()) ||
-		target->getType() == BWAPI::UnitTypes::Protoss_Dark_Templar) &&
+	if (((target->getType() == BWAPI::UnitTypes::Zerg_Lurker && target->isBurrowed()) ||
+		 target->getType() == BWAPI::UnitTypes::Protoss_Dark_Templar) &&
 		rangedUnitType == BWAPI::UnitTypes::Terran_Vulture &&
 		BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Spider_Mines) &&
 		rangedUnit->getSpiderMineCount() > 0)
 	{
+		return 6;
+	}
+	// Target flying units highly if we're a wraith, but not if it's an overlord
+	else if (targetType.isFlyer() && rangedUnitType == BWAPI::UnitTypes::Terran_Wraith &&
+		targetType != BWAPI::UnitTypes::Zerg_Overlord) {
 		return 6;
 	}
 	// second highest priority is something that can attack us or aid in combat
