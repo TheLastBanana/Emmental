@@ -697,6 +697,8 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	int numFac = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Factory);
 	int numStar = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Starport);
 	int numWraith = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Wraith);
+	int tanksWanted = 3;
+	if (numFac >= 3) tanksWanted = 6;
 	int wraithWanted = numWraith + 1*numStar;
 	// Build SCV
 	int numSCV = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_SCV);
@@ -750,10 +752,10 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 		+ InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Protoss_Carrier, BWAPI::Broodwar->enemy())
 		+ InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Zerg_Mutalisk, BWAPI::Broodwar->enemy()));
 
-	if (wraithPriority >= 3) {
+	if (wraithPriority >= 5) {
 		++starportsWanted;
 	}
-	if (wraithPriority >= 7) {
+	if (wraithPriority >= 8) {
 		++starportsWanted;
 		vulturesWanted -= numFac;
 		--factoriesWanted;
@@ -783,6 +785,11 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	*/
 
 	// build machine shops
+	if ((BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 2) &&
+		(numVultures > 0))
+	{
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Machine_Shop, 2, 10, false));
+	}
 	if ((BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 0) &&
 		(numVultures > 0))
 	{
@@ -791,6 +798,14 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 
 	// Make sure we have a machine shop
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Machine_Shop)) {
+		//Tank Siege mode.
+		if (!BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Tank_Siege_Mode) &&
+			!BWAPI::Broodwar->self()->isResearching(BWAPI::TechTypes::Tank_Siege_Mode))
+
+		{
+			goal.push_back(BuildOrderGoalItem(BWAPI::TechTypes::Tank_Siege_Mode, 1, 10, false));
+		}
+		
 		// Research ion thrusters
 		if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Ion_Thrusters) == 0 &&
 			!BWAPI::Broodwar->self()->isUpgrading(BWAPI::UpgradeTypes::Ion_Thrusters) &&
@@ -800,10 +815,15 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 		}
 		// Research spider mines
 		if (!BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Spider_Mines) &&
-			!BWAPI::Broodwar->self()->isResearching(BWAPI::TechTypes::Spider_Mines))
+			!BWAPI::Broodwar->self()->isResearching(BWAPI::TechTypes::Spider_Mines) &&
+			 BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Tank_Siege_Mode))
+
 		{
 			goal.push_back(BuildOrderGoalItem(BWAPI::TechTypes::Spider_Mines, 1, 10, false));
 		}
+	}
+	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Machine_Shop)) {
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode, tanksWanted, 6, false));
 	}
 
 	//build starport
@@ -820,8 +840,8 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	}
 
 	//expand when secure
-	if ((numCC == 1) && (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Bunker) > 0) 
-		&& (numVultures >= 5))
+	if ((numCC == 1) 
+		&& (numVultures > 5)) //add bunker requirement and lower vulture requirement
 	{
 		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Command_Center, numCC + 1, 10, false));
 	}
