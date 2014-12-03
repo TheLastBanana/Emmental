@@ -195,7 +195,7 @@ void Squad::setManagerUnits()
 }
 
 // calculates whether or not to regroup
-bool Squad::needsToRegroup(const UnitVector & u)
+bool Squad::needsToRegroup(const UnitVector & u, int unitsNeeded)
 {
 	// if we are not attacking, never regroup
 	if (u.empty() || !(order.type == SquadOrder::Attack || order.type == SquadOrder::Harass))
@@ -209,8 +209,8 @@ bool Squad::needsToRegroup(const UnitVector & u)
 		StrategyManager::Instance().getCurrentStrategy() == StrategyManager::TerranVultureRush ||
 		StrategyManager::Instance().getCurrentStrategy() == StrategyManager::TerranBugHunt)
 	{
-		// start attacking when we have 5 things in the vector
-		return u.size() < 5;
+		// start attacking when we have enough things in the vector
+		return u.size() < unitsNeeded;
 	}
 
 	// if we are DT rushing and we haven't lost a DT yet, no retreat!
