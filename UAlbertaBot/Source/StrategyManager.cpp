@@ -789,7 +789,7 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	*/
 
 	// build machine shops
-	if ((BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 2) &&
+	if ((BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 1) &&
 		(numVultures > 0))
 	{
 		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Machine_Shop, 2, 10, false));
