@@ -199,7 +199,8 @@ bool Squad::needsToRegroup(const UnitVector & u)
 
 	// for the Vulture rush strategy, we only care about whether we have enough vultures
 	if (BWAPI::Broodwar->self()->getRace() == BWAPI::Races::Terran &&
-		StrategyManager::Instance().getCurrentStrategy() == StrategyManager::TerranVultureRush)
+		StrategyManager::Instance().getCurrentStrategy() == StrategyManager::TerranVultureRush ||
+		StrategyManager::Instance().getCurrentStrategy() == StrategyManager::TerranBugHunt)
 	{
 		// start attacking when we have 5 things in the vector
 		return u.size() < 5;
