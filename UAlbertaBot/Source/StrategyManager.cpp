@@ -41,6 +41,7 @@ void StrategyManager::addStrategies()
 		"0 "	// SCV
 		"0 "	// SCV
 		"3 "	// Barracks
+		"0 "
 		"16 "
 		"0";
 
@@ -697,7 +698,8 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	int numFac = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Factory);
 	int numStar = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Starport);
 	int numWraith = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Wraith);
-	int tanksWanted = 3;
+	int tanksWanted = 1;
+	if (numFac > 1) tanksWanted = 3;
 	if (numFac >= 3) tanksWanted = 6;
 	int wraithWanted = numWraith + 1*numStar;
 	// Build SCV
@@ -823,7 +825,7 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 		}
 	}
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Machine_Shop)) {
-		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode, tanksWanted, 6, false));
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode, tanksWanted, 3, false));
 	}
 
 	//build starport
@@ -836,7 +838,7 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	// build wraith
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Starport) > 0)
 	{
-		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Wraith, wraithWanted, 2, false));
+		goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Wraith, wraithWanted, 3, false));
 	}
 
 	//expand when secure
