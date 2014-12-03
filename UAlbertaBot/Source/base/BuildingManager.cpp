@@ -130,7 +130,15 @@ void BuildingManager::assignWorkersToUnassignedBuildings()
 			b.finalPosition = testLocation;
 
 			// reserve this space
-			BuildingPlacer::Instance().reserveTiles(b.finalPosition, b.type.tileWidth(), b.type.tileHeight());
+			int width = b.type.tileWidth();
+			if (b.type == BWAPI::UnitTypes::Terran_Command_Center ||
+				b.type == BWAPI::UnitTypes::Terran_Factory ||
+				b.type == BWAPI::UnitTypes::Terran_Starport ||
+				b.type == BWAPI::UnitTypes::Terran_Science_Facility)
+			{
+				width += 2;
+			}
+			BuildingPlacer::Instance().reserveTiles(b.finalPosition, width, b.type.tileHeight());
 
 			// this building has now been assigned
 			buildingData.addBuilding(ConstructionData::Assigned, b);
