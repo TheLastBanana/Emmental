@@ -225,7 +225,7 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 		rangedUnit->getSpiderMineCount() > 0)
 	{
 		// Tweaking parameters
-		int spreadRadius = BWAPI::UnitTypes::Terran_Vulture_Spider_Mine.seekRange() / 3;
+		int spreadRadius = BWAPI::UnitTypes::Terran_Vulture_Spider_Mine.seekRange();
 		int dropDistance = BWAPI::UnitTypes::Terran_Vulture_Spider_Mine.seekRange() / 2;
 		bool canDrop = true;
 		BOOST_FOREACH(BWAPI::Unit* u, BWAPI::Broodwar->self()->getUnits()) {
