@@ -48,8 +48,8 @@ void TankManager::executeMicro(const UnitVector & targets)
 				BOOST_FOREACH(const BWAPI::Unit * target, rangedUnitTargets)
 				{
 					// siege if something is in siege range
-					if (rangedUnit->getDistance(target->getPosition()) <= BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange() &&
-						!rangedUnit->isSieged())
+					if (!(target->getType().isFlyer() || target->isLifted()) &&
+						rangedUnit->getDistance(target->getPosition()) <= BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange())
 					{
 						toSiege = true;
 						break;
