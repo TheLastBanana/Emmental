@@ -108,6 +108,13 @@ namespace BuildOrderSearch
 				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Comsat_Station, actions.size()));	// 20
 				actions.push_back(StarcraftAction(BWAPI::UpgradeTypes::Terran_Vehicle_Plating, actions.size()));// 21
 				actions.push_back(StarcraftAction(BWAPI::UpgradeTypes::Terran_Vehicle_Weapons, actions.size()));// 22
+				actions.push_back(StarcraftAction(BWAPI::UpgradeTypes::Terran_Ship_Plating, actions.size()));   // 23
+				actions.push_back(StarcraftAction(BWAPI::UpgradeTypes::Terran_Ship_Weapons, actions.size()));   // 24
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Science_Facility, actions.size()));  // 25
+				actions.push_back(StarcraftAction(BWAPI::UnitTypes::Terran_Control_Tower, actions.size()));     // 26
+				actions.push_back(StarcraftAction(BWAPI::TechTypes::Cloaking_Field, actions.size()));           // 27
+				actions.push_back(StarcraftAction(BWAPI::UpgradeTypes::Apollo_Reactor, actions.size()));        // 28
+
 
 			}
 			else if (r == BWAPI::Races::Zerg)
