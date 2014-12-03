@@ -171,6 +171,9 @@
     <ClCompile Include="..\Source\micromanagement\VultureManager.cpp">
       <Filter>game\combat\micro\generic</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\micromanagement\TankManager.cpp">
+      <Filter>game\combat\micro\generic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\CombatCommander.h">
@@ -306,6 +309,9 @@
       <Filter>game\macro\managers</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\micromanagement\VultureManager.h">
+      <Filter>game\combat\micro\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\micromanagement\TankManager.h">
       <Filter>game\combat\micro\generic</Filter>
     </ClInclude>
   </ItemGroup>
