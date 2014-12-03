@@ -29,7 +29,32 @@ void Squad::update()
 	}
 
 	// determine whether or not we should regroup vultures (and tanks)
-	const bool vulturesNeedToRegroup(needsToRegroup(vultureManager.getUnits()));
+	int vultureGroup = 4;
+	if (InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode, BWAPI::Broodwar->enemy())
+		+ InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode, BWAPI::Broodwar->enemy())
+		+ InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Protoss_Dragoon, BWAPI::Broodwar->enemy())> 4)
+	{
+		if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode) + 
+			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode) > 2)
+			vultureGroup = 4;
+		else {
+			vultureGroup = 7;
+		}
+	}
+
+	if (InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Terran_Bunker, BWAPI::Broodwar->enemy())
+		+ InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Protoss_Photon_Cannon, BWAPI::Broodwar->enemy())
+		+ InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Zerg_Sunken_Colony, BWAPI::Broodwar->enemy())
+		> 4)
+	{
+		if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode) +
+			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode) > 3)
+			vultureGroup = 4;
+		else {
+			vultureGroup = 10;
+		}
+	}
+	const bool vulturesNeedToRegroup(needsToRegroup(vultureManager.getUnits(), vultureGroup));
 	if (vulturesNeedToRegroup) {
 		InformationManager::Instance().lastFrameRegroup = 1;
 
@@ -57,7 +82,23 @@ void Squad::update()
 	}
 
 	// determine whether or not we should regroup wraiths
-	const bool wraithsNeedToRegroup(needsToRegroup(rangedManager.getUnits()));
+	int wraithGroup = 2;
+	if (InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Terran_Wraith, BWAPI::Broodwar->enemy())
+		+ InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Protoss_Scout, BWAPI::Broodwar->enemy())
+		+ InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Zerg_Mutalisk, BWAPI::Broodwar->enemy()) 
+		+ InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Protoss_Photon_Cannon, BWAPI::Broodwar->enemy()) > 3)
+	{
+		wraithGroup = 4;
+	}
+
+	if (InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Terran_Missile_Turret, BWAPI::Broodwar->enemy())
+		+ InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Zerg_Spore_Colony, BWAPI::Broodwar->enemy())
+		> 3)
+	{
+		wraithGroup = 6;
+	}
+
+	const bool wraithsNeedToRegroup(needsToRegroup(rangedManager.getUnits(), wraithGroup));
 	if (wraithsNeedToRegroup) {
 		InformationManager::Instance().lastFrameRegroup = 1;
 
