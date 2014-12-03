@@ -171,7 +171,9 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 	// Is the target a mine objective
 	bool shouldMineTarget = (target->getType() == BWAPI::UnitTypes::Zerg_Lurker && target->isBurrowed()) ||
 		target->getType() == BWAPI::UnitTypes::Protoss_Dark_Templar ||
-		target->getType() == BWAPI::UnitTypes::Protoss_Dragoon;
+		target->getType() == BWAPI::UnitTypes::Protoss_Dragoon ||
+		target->getType() == BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode ||
+		target->getType() == BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode;
 	
 	bool closeToTarget;
 	// An attempt to not check the distance every time (faster?)

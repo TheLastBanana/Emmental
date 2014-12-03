@@ -2,7 +2,7 @@
 #include "WorkerManager.h"
 
 WorkerManager::WorkerManager() 
-    : workersPerRefinery(2) 
+    : workersPerRefinery(3) 
 {
     previousClosestWorker = NULL;
 	startPos = BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation());
