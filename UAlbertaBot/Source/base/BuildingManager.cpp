@@ -182,23 +182,21 @@ BWAPI::TilePosition BuildingManager::getBuildingLocation(const Building & b)
 			// set the building padding specifically
 			int distance = 1;
 			// to let marines (size 1) & vultures (size 2) through.
-			if (b.type == BWAPI::UnitTypes::Terran_Missile_Turret)
-				distance = 2;
-			else if (b.type == BWAPI::UnitTypes::Terran_Bunker)
-				distance = 2;
+			if (b.type == BWAPI::UnitTypes::Terran_Missile_Turret || b.type == BWAPI::UnitTypes::Terran_Bunker)
+				distance = 1;
 
 			// whether or not we want the distance to be horizontal only
             bool horizontalOnly = b.type == BWAPI::UnitTypes::Protoss_Citadel_of_Adun ? true : false;
 
+			BWAPI::TilePosition position = BWAPI::TilePositions::None;
+
 			// set the location with priority on positions in our own region, unless bunker.
 			if (b.type == BWAPI::UnitTypes::Terran_Bunker)
 			{
-				BWAPI::TilePosition position = BWAPI::TilePositions::None;
-
 				if (BunkerManager::Instance().allBunkers().size() > 0){
 					// place next bunker near other bunker
 					BWAPI::Unit* bunker = *BunkerManager::Instance().allBunkers().begin();
-					position = BuildingPlacer::Instance().getBuildLocationNear(b, distance, false, false, BWAPI::TilePosition(bunker->getPosition()));
+					testLocation = BuildingPlacer::Instance().getBuildLocationNear(b, distance, false, false, BWAPI::TilePosition(bunker->getPosition()));
 				}
 				else
 				{
@@ -207,15 +205,15 @@ BWAPI::TilePosition BuildingManager::getBuildingLocation(const Building & b)
 					
 					// build @ area near chokepoint that is closest to base, no more building on the wrong side of the choke point!
 					position = BuildingPlacer::Instance().getPointClosestTo(choke, BWAPI::Broodwar->self()->getStartLocation(), b, distance);
+					testLocation = BuildingPlacer::Instance().getBuildLocationNear(b, distance, false, false, position);
 				}
-
-				testLocation = position;
 			}
 			else if (b.type == BWAPI::UnitTypes::Terran_Missile_Turret)
 			{
 				BWAPI::TilePosition choke = MapTools::Instance().getClosestChokepoint(BWAPI::Broodwar->self()->getStartLocation());
 				// place the turret near the chokepoint on the right side.
-				testLocation = BuildingPlacer::Instance().getPointClosestTo(choke, BWAPI::Broodwar->self()->getStartLocation(), b, distance);
+				position = BuildingPlacer::Instance().getPointClosestTo(choke, BWAPI::Broodwar->self()->getStartLocation(), b, distance);
+				testLocation = BuildingPlacer::Instance().getBuildLocationNear(b, distance, false, false, position);
 			}
 			else
 			{

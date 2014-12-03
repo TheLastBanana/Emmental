@@ -39,7 +39,7 @@ void WorkerManager::updateWorkerStatus()
 	BWAPI::Unit* slave = 0;
 
 	std::set<BWAPI::Unit*> inRadi = BWAPI::Broodwar->getUnitsInRadius(startPos, baseRad);
-	BWAPI::Broodwar->drawCircleMap(startPos.x(), startPos.y(), baseRad, BWAPI::Colors::Orange);
+	//BWAPI::Broodwar->drawCircleMap(startPos.x(), startPos.y(), baseRad, BWAPI::Colors::Orange);
 	
 	// for each of our Workers
 	BOOST_FOREACH (BWAPI::Unit * worker, workerData.getWorkers())

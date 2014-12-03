@@ -478,14 +478,14 @@ BWAPI::TilePosition BuildingPlacer::getPointClosestTo(BWAPI::TilePosition target
 	double yIncrease = sin(atanVal);
 
 	int getDist = static_cast<int>(target.getDistance(closeTo));
-	for (int i = 1; i < getDist; ++i)
+	for (int i = 4; i < getDist; ++i)
 	{
 		buildPos = target + BWAPI::TilePosition(static_cast<int>(-xIncrease*i), static_cast<int>(-yIncrease*i));
 		if (this->canBuildHereWithSpace(buildPos, b, bDist, false))
 			return buildPos;
 	}
-
-	return BWAPI::TilePositions::None;
+	buildPos = target + BWAPI::TilePosition(static_cast<int>(-xIncrease * 8), static_cast<int>(-yIncrease * 8));
+	return buildPos;
 }
 
 BuildingPlacer & BuildingPlacer::Instance() {
