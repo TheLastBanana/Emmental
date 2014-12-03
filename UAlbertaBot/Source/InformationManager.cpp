@@ -311,7 +311,22 @@ void InformationManager::onUnitDestroy(BWAPI::Unit * unit)
 	else if (unit->getPlayer() == BWAPI::Broodwar->self())
 	{
 		selfUnitData.removeUnit(unit);
+		// remove any dead comsats stations
+		if (unit->getType() == BWAPI::UnitTypes::Terran_Comsat_Station)
+		{
+			std::set<BWAPI::Unit*>::iterator comsatIsKill = comsatSet.find(unit);
+			if (comsatIsKill != comsatSet.end())
+				comsatSet.erase(*comsatIsKill);
+		}
 	}
+}
+
+void InformationManager::onUnitCreate(BWAPI::Unit * unit)
+{
+	updateUnit(unit);
+	// add in comsats
+	if (unit->getPlayer() == BWAPI::Broodwar->self() && unit->getType() == BWAPI::UnitTypes::Terran_Comsat_Station)
+			comsatSet.insert(unit);
 }
 
 BWAPI::Unit * InformationManager::getClosestUnitToTarget(BWAPI::UnitType type, BWAPI::Position target)
@@ -453,4 +468,9 @@ bool InformationManager::enemyHasDetector()
 bool InformationManager::tileContainsUnit(BWAPI::TilePosition tile)
 {
 	return map.canBuildHere(tile);
+}
+
+const std::set<BWAPI::Unit *> InformationManager::getComsatSet() const
+{
+	return comsatSet;
 }

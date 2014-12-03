@@ -160,6 +160,19 @@ void RangedManager::executeMicro(const UnitVector & targets)
 
 void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targets, BWAPI::Unit * target)
 {
+	if ((target->isCloaked() || target->isBurrowed()) && !target->isDetected())
+	{
+		std::set<BWAPI::Unit*> comsats = InformationManager::Instance().getComsatSet();
+		BOOST_FOREACH(BWAPI::Unit* comsat, comsats)
+		{
+			if (comsat->getEnergy() > BWAPI::TechTypes::Scanner_Sweep.energyUsed())
+			{
+				comsat->useTech(BWAPI::TechTypes::Scanner_Sweep,target->getPosition());
+				break;
+			}
+		}
+	}
+
 	// Range of our unit
 	int range(rangedUnit->getType().groundWeapon().maxRange());
 	

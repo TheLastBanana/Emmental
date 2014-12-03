@@ -210,7 +210,7 @@ bool Squad::needsToRegroup(const UnitVector & u, int unitsNeeded)
 		StrategyManager::Instance().getCurrentStrategy() == StrategyManager::TerranBugHunt)
 	{
 		// start attacking when we have enough things in the vector
-		return u.size() < unitsNeeded;
+		return u.size() < static_cast<size_t>(unitsNeeded);
 	}
 
 	// if we are DT rushing and we haven't lost a DT yet, no retreat!
