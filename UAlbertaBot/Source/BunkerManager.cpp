@@ -8,7 +8,7 @@ BunkerManager::BunkerManager()
 	replacedSlave = 0; 
 	start = BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation());
 
-	// ASCII art from http://www.retrojunkie.com/asciiart/food/cheese.htm
+	// ASCII arts from http://www.retrojunkie.com/asciiart/food/cheese.htm
 	// 11 lines max is the chat high.
 	/*BWAPI::Broodwar->sendText(".      ___ ___");
 	BWAPI::Broodwar->sendText(".     /\\ (_)    \\");
@@ -45,12 +45,11 @@ void BunkerManager::executeMicro(const UnitVector & targets)
 void BunkerManager::patrolling(BWAPI::Unit* unit, BWAPI::Position target, int radius) const
 {
 	UnitVector enemyNear;
-	MapGrid::Instance().GetUnits(enemyNear, target, 400, false, true);
+	MapGrid::Instance().GetUnits(enemyNear, unit->getPosition(), 500, false, true);
 
 	if (enemyNear.size() > 0)
 		unit->attack(enemyNear.front());
 	else
-		//unit->move(target);
 		unit->patrol(target + BWAPI::Position((rand() % radius) - (radius/2), (rand() % radius) - (radius/2)));
 }
 
@@ -104,12 +103,12 @@ void BunkerManager::updateBunkerSlave()
 	}
 	// make sure the slave is always behind the bunker
 	BWAPI::Unit* bunker = *bunkersAll.begin();
-	if (!bunkerRepairSlave->isRepairing() && (bunkerRepairSlave->getDistance(start) > bunker->getDistance(start)) && 
-		!bunkerRepairSlave->isStuck() && bunkerRepairSlave->getDistance(bunker) < 60)
+	if ((!bunkerRepairSlave->isRepairing() && (bunkerRepairSlave->getDistance(start) > bunker->getDistance(start)) && 
+		!bunkerRepairSlave->isStuck() && bunkerRepairSlave->getDistance(bunker) < 70) || bunkerRepairSlave->isUnderAttack() )
 		bunkerRepairSlave->move(start);
 
 	// tell slave to stay near bunker if it is not repairing.
-	if (!bunkerRepairSlave->isRepairing() && bunkerRepairSlave->getDistance(bunker) > 60)
+	if (!bunkerRepairSlave->isUnderAttack() && !bunkerRepairSlave->isRepairing() && bunkerRepairSlave->getDistance(bunker) > 70)
 		bunkerRepairSlave->move(bunker->getPosition());
 }
 
@@ -216,6 +215,14 @@ BWAPI::Unit* BunkerManager::getBunkerSlave() const
 bool BunkerManager::replacedMaxSlaves() const
 {
 	return replacedSlave >= maxReplaceSlave;
+}
+
+bool BunkerManager::bunkersUnderAttack() const
+{
+	BOOST_FOREACH(BWAPI::Unit* unit, bunkersAll)
+		if (unit->isUnderAttack())
+			return true;
+	return false;
 }
 
 BunkerManager & BunkerManager::Instance()

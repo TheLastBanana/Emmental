@@ -124,8 +124,11 @@ void WorkerData::setWorkerJob(BWAPI::Unit * unit, enum WorkerJob job, BWAPI::Uni
 		// only SCVs can repair
 		assert(unit->getType() == BWAPI::UnitTypes::Terran_SCV);
 
-		// set the building the worker is to repair
+		//set the building the worker is to repair
 		workerRepairMap[unit] = jobUnit;
+
+		// set the building the worker is to repair
+		repairedByWorkersMap.insert(std::pair<BWAPI::Unit*, BWAPI::Unit*>(jobUnit, unit));
 
 		// start repairing 
 		unit->repair(jobUnit);
@@ -197,6 +200,7 @@ void WorkerData::clearPreviousJob(BWAPI::Unit * unit)
 	}
 	else if (previousJob == Repair)
 	{
+		repairedByWorkersMap.erase(workerRepairMap[unit]);
 		workerRepairMap.erase(unit);
 	}
 	else if (previousJob == Move)
@@ -440,6 +444,20 @@ BWAPI::Unit * WorkerData::getWorkerRepairUnit(BWAPI::Unit * unit)
 	{
 		return it->second;
 	}	
+
+	return NULL;
+}
+
+BWAPI::Unit * WorkerData::getWorkerRepairUnitBuilding(BWAPI::Unit * building)
+{
+	if (!building) { return NULL; }
+
+	std::multimap<BWAPI::Unit*, BWAPI::Unit*>::iterator it = repairedByWorkersMap.find(building);
+
+	if (it != repairedByWorkersMap.end())
+	{
+		return it->second;
+	}
 
 	return NULL;
 }

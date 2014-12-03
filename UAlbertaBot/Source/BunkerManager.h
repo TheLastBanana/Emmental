@@ -72,6 +72,9 @@ public:
 	// returns true if maximum replaced bunker slaves reached
 	bool replacedMaxSlaves() const;
 
+	// returns true if any bunker is being attacked
+	bool bunkersUnderAttack() const;
+
 	// returns the instance of BunkerManager
 	static BunkerManager & Instance();
 

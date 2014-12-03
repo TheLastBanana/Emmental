@@ -5,6 +5,9 @@ WorkerManager::WorkerManager()
     : workersPerRefinery(2) 
 {
     previousClosestWorker = NULL;
+	startPos = BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation());
+	BWAPI::Position nearestChoke(MapTools::Instance().getClosestChokepoint(BWAPI::Broodwar->self()->getStartLocation()));
+	baseRad = static_cast<int>(startPos.getDistance(nearestChoke));
 }
 
 void WorkerManager::update() 
@@ -35,6 +38,9 @@ void WorkerManager::updateWorkerStatus()
 	// the scv slave
 	BWAPI::Unit* slave = 0;
 
+	std::set<BWAPI::Unit*> inRadi = BWAPI::Broodwar->getUnitsInRadius(startPos, baseRad);
+	BWAPI::Broodwar->drawCircleMap(startPos.x(), startPos.y(), baseRad, BWAPI::Colors::Orange);
+	
 	// for each of our Workers
 	BOOST_FOREACH (BWAPI::Unit * worker, workerData.getWorkers())
 	{
@@ -70,9 +76,30 @@ void WorkerManager::updateWorkerStatus()
 			}
 		}
 
+		// if there is something to repair in the vincinity.
+		if (isFree(worker))// check also if no enemies in base with that bwapi function somewhere.
+		{
+			if (inRadi.find(worker) != inRadi.end())
+			{
+				BOOST_FOREACH(BWAPI::Unit* nearby, inRadi)
+				{
+					if (nearby->getType().isBuilding() && nearby->getType() != BWAPI::UnitTypes::Terran_Bunker)
+					{
+						int burnHP = nearby->getType().maxHitPoints() / 3;
+						if (!nearby->isUnderAttack() && nearby->getHitPoints() <= burnHP)
+						{
+							BWAPI::Unit* isIn = workerData.getWorkerRepairUnitBuilding(nearby);
+							if (isIn == NULL)
+								workerData.setWorkerJob(worker, WorkerData::Repair, nearby);
+						}
+					}
+				}
+			}
+		}
+
 		// if bunker needs a repair slave SCV, set it if its mineral worker or idle.
 		if ((!BunkerManager::Instance().replacedMaxSlaves()) && BunkerManager::Instance().allBunkers().size() > 0 &&
-			BunkerManager::Instance().bunkerRepairEmpty() && isFree(worker))
+			BunkerManager::Instance().bunkerRepairEmpty() && isFree(worker) && !BunkerManager::Instance().bunkersUnderAttack())
 		{
 			BWAPI::Unit* bunker = *BunkerManager::Instance().allBunkers().begin();
 			if (slave == 0)
@@ -580,6 +607,7 @@ void WorkerManager::onUnitDestroy(BWAPI::Unit * unit)
 
 		rebalanceWorkers();
 	}
+
 }
 
 void WorkerManager::smartAttackUnit(BWAPI::Unit * attacker, BWAPI::Unit * target)

@@ -37,6 +37,7 @@ private:
 	std::map<BWAPI::Unit *, BWAPI::Unit *>			workerDepotMap;
 	std::map<BWAPI::Unit *, BWAPI::Unit *>			workerRefineryMap;
 	std::map<BWAPI::Unit *, BWAPI::Unit *>			workerRepairMap;
+	std::multimap<BWAPI::Unit *, BWAPI::Unit *>		repairedByWorkersMap;
 	std::map<BWAPI::Unit *, WorkerMoveData>			workerMoveMap;
 	std::map<BWAPI::Unit *, BWAPI::UnitType>		workerBuildingTypeMap;
 
@@ -83,6 +84,8 @@ public:
 	BWAPI::Unit *			getWorkerResource(BWAPI::Unit * unit);
 	BWAPI::Unit *			getWorkerDepot(BWAPI::Unit * unit);
 	BWAPI::Unit *			getWorkerRepairUnit(BWAPI::Unit * unit);
+	// checks if a unit is repairing a given unit, returns null if nothing is repairing it.
+	BWAPI::Unit *			getWorkerRepairUnitBuilding(BWAPI::Unit * building);
 	BWAPI::UnitType			getWorkerBuildingType(BWAPI::Unit * unit);
 	WorkerMoveData			getWorkerMoveData(BWAPI::Unit * unit);
 

@@ -18,6 +18,9 @@ class WorkerManager {
 
 	void						setMineralWorker(BWAPI::Unit * unit);
 
+	BWAPI::Position				startPos;
+	int							baseRad;
+
 	WorkerManager();
 
 public:
