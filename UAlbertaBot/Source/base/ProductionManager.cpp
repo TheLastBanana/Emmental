@@ -133,7 +133,7 @@ void ProductionManager::update()
 			if (firstType.isTech() || firstType.isUpgrade())
 			{
 				// check if there's anything free to research this
-				BWAPI::Unit * producer = selectUnitOfType(firstType.whatBuilds());
+				BWAPI::Unit * producer = selectUnitOfType(firstType.whatBuilds(), firstType);
 				if (!producer || !canMakeNow(producer, firstType))
 				{
 					BWAPI::Broodwar->printf("Waiting on a tech for a long time, new search!");
@@ -207,7 +207,7 @@ void ProductionManager::manageBuildOrderQueue()
 	while (!queue.isEmpty()) 
 	{
 		// this is the unit which can produce the currentItem
-		BWAPI::Unit * producer = selectUnitOfType(currentItem.metaType.whatBuilds());
+		BWAPI::Unit * producer = selectUnitOfType(currentItem.metaType.whatBuilds(), currentItem.metaType);
 
 		// check to see if we can make it right now
 		bool canMake = canMakeNow(producer, currentItem.metaType);
@@ -474,7 +474,7 @@ void ProductionManager::createMetaType(BWAPI::Unit * producer, MetaType t)
 }
 
 // selects a unit of a given type
-BWAPI::Unit * ProductionManager::selectUnitOfType(BWAPI::UnitType type, bool leastTrainingTimeRemaining, BWAPI::Position closestTo) {
+BWAPI::Unit * ProductionManager::selectUnitOfType(BWAPI::UnitType type, MetaType toBuild, bool leastTrainingTimeRemaining, BWAPI::Position closestTo) {
 
 	// if we have none of the unit type, return NULL right away
 	if (BWAPI::Broodwar->self()->completedUnitCount(type) == 0) 
@@ -506,8 +506,15 @@ BWAPI::Unit * ProductionManager::selectUnitOfType(BWAPI::UnitType type, bool lea
 	} else if (type.isBuilding() && leastTrainingTimeRemaining) {
 
 		BOOST_FOREACH (BWAPI::Unit * u, BWAPI::Broodwar->self()->getUnits()) {
+			// siege tanks need a machine shop
+			if (toBuild.isUnit() && toBuild.unitType == BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode)
+			{
+				if (u->getAddon() == NULL) continue;
+				if (u->getAddon()->getType() != BWAPI::UnitTypes::Terran_Machine_Shop) continue;
+			}
 
-			if (u->getType() == type && u->isCompleted() && !u->isTraining() && !u->isLifted() &&!u->isUnpowered() && !u->isResearching() && !u->isUpgrading()) {
+			if (u->getType() == type && u->isCompleted() && !u->isTraining() && !u->isLifted() &&
+				!u->isUnpowered() && !u->isResearching() && !u->isUpgrading()) {
 
 				return u;
 			}

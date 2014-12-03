@@ -43,7 +43,7 @@ class ProductionManager
 	bool						rushDetected;
 
 	BWAPI::TilePosition			predictedTilePosition;
-	BWAPI::Unit *				selectUnitOfType(BWAPI::UnitType type, bool leastTrainingTimeRemaining = true, BWAPI::Position closestTo = BWAPI::Position(0,0));
+	BWAPI::Unit *				selectUnitOfType(BWAPI::UnitType type, MetaType toBuild = BWAPI::UnitTypes::None, bool leastTrainingTimeRemaining = true, BWAPI::Position closestTo = BWAPI::Position(0, 0));
 	BuildOrderQueue				queue;
 	BWAPI::UnitType				getProducer(MetaType t);
 
