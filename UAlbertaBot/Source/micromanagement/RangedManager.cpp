@@ -250,8 +250,8 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 		else if (canDrop && closeToTarget) {
 			bool dropSuccess = rangedUnit->useTech(BWAPI::TechTypes::Spider_Mines, rangedUnit->getPosition());
 			kite = false; // If we're trying to drop a mine, don't kite
-			BWAPI::Broodwar->printf("Mining against %s",
-				target->getType().c_str());
+			//BWAPI::Broodwar->printf("Mining against %s",
+			//	target->getType().c_str());
 		}
 	}
 
