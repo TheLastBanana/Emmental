@@ -240,7 +240,6 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 			double2 toRangedUnit(target->getPosition() - rangedUnit->getPosition());
 			toRangedUnit.normalise();
 			toRangedUnit = toRangedUnit * dropDistance; // Make it longer!
-			BWAPI::Broodwar->printf("vector len: %f, x: %f, y: %f", toRangedUnit.len(), toRangedUnit.x, toRangedUnit.y);
 
 			// Move there
 			rangedUnit->move(target->getPosition() + toRangedUnit);
