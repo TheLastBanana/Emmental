@@ -181,7 +181,7 @@ void RangedManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & targ
 
 	// determine whether the target can be kited
 	if (range <= getEffectiveRange(rangedUnit, target) && !(vultureWithMine && shouldMineTarget))
-	{\
+	{
 		// if we can't kite it, there's no point
 		smartAttackUnit(rangedUnit, target);
 		return;
