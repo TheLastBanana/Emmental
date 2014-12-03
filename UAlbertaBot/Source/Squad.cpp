@@ -28,7 +28,7 @@ void Squad::update()
 		}
 	}
 
-	// determine whether or not we should regroup vultures
+	// determine whether or not we should regroup vultures (and tanks)
 	const bool vulturesNeedToRegroup(needsToRegroup(vultureManager.getUnits()));
 	if (vulturesNeedToRegroup) {
 		InformationManager::Instance().lastFrameRegroup = 1;
@@ -39,12 +39,14 @@ void Squad::update()
 		BWAPI::Broodwar->drawCircleMap(regroupPosition.x(), regroupPosition.y(), 30, BWAPI::Colors::Purple, true);
 
 		vultureManager.regroup(regroupPosition);
+		tankManager.regroup(regroupPosition);
 	}
 	else // otherwise, execute micro
 	{
 		InformationManager::Instance().lastFrameRegroup = 1;
 
 		vultureManager.execute(order);
+		tankManager.execute(order);
 	}
 
 	// determine whether or not we should regroup wraiths
@@ -84,8 +86,6 @@ void Squad::update()
 
 		meleeManager.execute(order);
 	}
-
-	tankManager.execute(order);
 }
 
 void Squad::updateUnits()

@@ -161,13 +161,14 @@ void CombatCommander::assignDefenseSquads(std::set<BWAPI::Unit *> & unitsToAssig
 	if (foundTankPos)
 	{
 		UnitVector tanks;
-		// assign all tanks
+		// assign 2 tanks to defend the bunker
 		BOOST_FOREACH(BWAPI::Unit * u, unitsToAssign)
 		{
 			if (u->getType() == BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode ||
 				u->getType() == BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode)
 			{
 				tanks.push_back(u);
+				if (tanks.size() >= 2) break;
 			}
 		}
 		BOOST_FOREACH(BWAPI::Unit * u, tanks)

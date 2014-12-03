@@ -8,7 +8,10 @@ void TankManager::kiteTarget(BWAPI::Unit * rangedUnit, const UnitVector & target
 	if (rangedUnit->isInWeaponRange(target))
 	{
 		smartAttackUnit(rangedUnit, target);
-		return;
+	}
+	else
+	{
+		smartAttackMove(rangedUnit, target->getPosition());
 	}
 }
 
@@ -35,28 +38,56 @@ void TankManager::executeMicro(const UnitVector & targets)
 	// for each zealot
 	BOOST_FOREACH(BWAPI::Unit * rangedUnit, rangedUnits)
 	{
-		// siege once we're at the bunker
-		if (BWAPI::Broodwar->getFrameCount() % 24)
+		// siege mode
+		if (BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Tank_Siege_Mode))
 		{
-			BWAPI::Unit * bunker = NULL;
+			bool toSiege = false;
 
-			// find the bunker
-			BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->self()->getUnits())
+			// defend the bunker
+			if (order.type == order.Defend)
 			{
-				if (unit->getType() == BWAPI::UnitTypes::Terran_Bunker)
+				BWAPI::Unit * bunker = NULL;
+
+				// find the bunker
+				BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->self()->getUnits())
 				{
-					bunker = unit;
-					break;
+					if (unit->getType() == BWAPI::UnitTypes::Terran_Bunker)
+					{
+						bunker = unit;
+						break;
+					}
+				}
+
+				// near bunker
+				if (bunker && rangedUnit->getPosition().getApproxDistance(bunker->getPosition()) < 150 &&
+					!rangedUnit->isMoving())
+				{
+					toSiege = true;
+				}
+			}
+			else
+			{
+				BOOST_FOREACH(const BWAPI::Unit * target, targets)
+				{
+					// siege if something is in siege range
+					if (rangedUnit->getDistance(target->getPosition()) <= BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode.groundWeapon().maxRange())
+					{
+						toSiege = true;
+						break;
+					}
 				}
 			}
 
-			if (bunker && rangedUnit->getPosition().getApproxDistance(bunker->getPosition()) < 250 &&
-				BWAPI::Broodwar->self()->hasResearched(BWAPI::TechTypes::Tank_Siege_Mode) &&
-				!rangedUnit->isSieged() && !rangedUnit->isMoving())
+			// engage/disengage siege
+			if (toSiege && !rangedUnit->isSieged())
 			{
 				rangedUnit->siege();
-
-				return;
+				continue;
+			}
+			else if (!toSiege && rangedUnit->isSieged())
+			{
+				rangedUnit->unsiege();
+				continue;
 			}
 		}
 
