@@ -29,7 +29,7 @@ void VultureManager::executeMicro(const UnitVector & targets)
 	BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->enemy()->getUnits())
 	{
 		// Add stealth units. If they have wraiths hope our wraiths fight them unstealthed
-		if (unit->getType() == BWAPI::UnitTypes::Zerg_Lurker ||
+		if ((unit->getType() == BWAPI::UnitTypes::Zerg_Lurker && unit->isBurrowed()) ||
 			unit->getType() == BWAPI::UnitTypes::Protoss_Dark_Templar)
 		{
 			stealthTargets.push_back(unit);
@@ -42,7 +42,7 @@ void VultureManager::executeMicro(const UnitVector & targets)
 		UnitVector effectiveTargets(rangedUnitTargets);
 		// Deal with stealth units on a unit by unit basis
 		BOOST_FOREACH(BWAPI::Unit * stealthEnemy, stealthTargets) {
-			if (rangedUnit->getDistance(stealthEnemy) <= stealthEnemy->getType().sightRange()) {
+			if (rangedUnit->getDistance(stealthEnemy) <= stealthEnemy->getType().seekRange()) {
 				effectiveTargets.push_back(stealthEnemy);
 			}
 		}
@@ -60,7 +60,6 @@ void VultureManager::executeMicro(const UnitVector & targets)
 			{
 				// find the best target for this zealot
 				BWAPI::Unit * target = getTarget(rangedUnit, effectiveTargets);
-
 				// attack it
 				kiteTarget(rangedUnit, effectiveTargets, target);
 			}
