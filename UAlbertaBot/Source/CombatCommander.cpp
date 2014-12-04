@@ -126,7 +126,7 @@ void CombatCommander::assignScoutDefenseSquads()
             // get our worker unit that is mining that is closest to it
             BWAPI::Unit * workerDefender    = WorkerManager::Instance().getClosestMineralWorkerTo(enemyWorker);
 
-			if (workerDefender == NULL) {
+			if (workerDefender != NULL) {
 				// grab it from the worker manager
 				WorkerManager::Instance().setCombatWorker(workerDefender);
 
