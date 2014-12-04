@@ -56,7 +56,9 @@ void Squad::update()
 	}
 
 	bool vulturesNeedToRegroup(needsToRegroup(vultureManager.getUnits(), vultureGroup));
-	vulturesNeedToRegroup = vulturesNeedToRegroup && needsToRegroup(tankManager.getUnits(), 7);
+	int tanks = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode) +
+				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode);
+	vulturesNeedToRegroup = vulturesNeedToRegroup && (tanks < 7);
 
 	if (vulturesNeedToRegroup) {
 		InformationManager::Instance().lastFrameRegroup = 1;
