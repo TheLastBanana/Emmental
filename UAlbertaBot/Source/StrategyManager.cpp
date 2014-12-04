@@ -701,7 +701,7 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	int numTanks = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode) +
 		BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode);
 	int tanksWanted = 1;
-	if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Machine_Shop > 1)) tanksWanted = 3;
+	if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_Machine_Shop > 1)) tanksWanted = 2;
 	if (numFac >= 3) tanksWanted = 6;
 	int wraithWanted = numWraith + 1*numStar;
 	// Build SCV
@@ -869,7 +869,7 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 	//If we have a ton of extra money we should try to spend it.
 	//This isn't working.
 	// Build armory (upgrades)
-	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) >= 2)
+	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) >= 3)
 	{ 
 		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Armory) < 2)
 			goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Armory, 2, 2, false));
