@@ -874,9 +874,9 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Armory) < 2)
 			goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Armory, 2, 2, false));
 	}
-	/*
+	
 	//Comsat addon.
-	if ((BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 1) &&
+	if ((BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Factory) > 2) &&
 	(BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Bunker) > 0))
 	{
 		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Academy) < 1)
@@ -888,7 +888,7 @@ const BOGIVector StrategyManager::getTerranBuildOrderGoal() const
 			goal.push_back(BuildOrderGoalItem(BWAPI::UnitTypes::Terran_Comsat_Station, 1, 11, false));
 		}
 	}
-	*/
+	
 
 	// Build upgrades
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Terran_Armory) > 0) {
