@@ -54,7 +54,10 @@ void Squad::update()
 			vultureGroup = 10;
 		}
 	}
-	const bool vulturesNeedToRegroup(needsToRegroup(vultureManager.getUnits(), vultureGroup));
+
+	bool vulturesNeedToRegroup(needsToRegroup(vultureManager.getUnits(), vultureGroup));
+	vulturesNeedToRegroup = vulturesNeedToRegroup && needsToRegroup(tankManager.getUnits(), 7);
+
 	if (vulturesNeedToRegroup) {
 		InformationManager::Instance().lastFrameRegroup = 1;
 
